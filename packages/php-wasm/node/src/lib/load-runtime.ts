@@ -5,7 +5,7 @@ import type {
 	OSUserSpaceAPI,
 	OSUserSpaceContext,
 } from '@php-wasm/universal';
-import { loadPHPRuntime, FSHelpers } from '@php-wasm/universal';
+import { loadPHPRuntime, FSHelpers, bindUserSpace } from '@php-wasm/universal';
 import fs from 'fs';
 import { getPHPLoaderModule } from '.';
 import { withNetworking } from './networking/with-networking';
@@ -41,21 +41,10 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
 		 */
 		processId?: number;
 
-		// TODO: Remove this.
-		// /**
-		//  * An optional file lock manager to use for the PHP runtime.
-		//  *
-		//  * The lock manager is optional when running a single php-wasm process.
-		//  *
-		//  * When running with JSPI, both synchronous and asynchronous
-		//  * file lock managers are supported.
-		//  * When running with Asyncify, the file lock manager must be synchronous.
-		//  */
-		// fileLockManager?:
-		// 	| RemoteAPI<FileLockManager>
-		// 	// Allow promised type for testing without providing true RemoteAPI.
-		// 	| Promised<FileLockManager>
-		// 	| FileLockManager;
+		// TODO: Document this.
+		bindUserSpace?: (
+			userSpaceContext: OSUserSpaceContext
+		) => OSUserSpaceAPI;
 
 		/**
 		 * An optional function to collect trace messages.
@@ -67,20 +56,10 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
 		trace?: (processId: number, format: string, ...args: any[]) => void;
 
 		/**
-		 * An optional object to pass to the PHP-WASM library's `init` function.
-		 *
-		 * phpWasmInitOptions.nativeInternalDirPath is used to mount a
-		 * real, native directory as the php-wasm /internal directory.
-		 *
-		 * @see https://github.com/php-wasm/php-wasm/blob/main/compile/php/phpwasm-emscripten-library.js#L100
+		 * An optional path used to a real, native directory
+		 * to be mounted as the php-wasm /internal directory.
 		 */
-		phpWasmInitOptions?: {
-			nativeInternalDirPath?: string;
-			// TODO: Document this.
-			bindUserSpace?: (
-				userSpaceContext: OSUserSpaceContext
-			) => OSUserSpaceAPI;
-		};
+		nativeInternalDirPath?: string;
 	};
 };
 
@@ -105,6 +84,14 @@ export async function loadNodeRuntime(
 		 */
 		quit: function (code, error) {
 			throw error;
+		},
+		bindUserSpace: (userSpaceContext: OSUserSpaceContext) => {
+			return bindUserSpace(
+				{
+					fileLockManager: options?.fileLockManager,
+				},
+				userSpaceContext
+			);
 		},
 		...(options.emscriptenOptions || {}),
 		onRuntimeInitialized: (phpRuntime: PHPRuntime) => {
