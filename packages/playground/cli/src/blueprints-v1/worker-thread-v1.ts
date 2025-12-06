@@ -1,9 +1,10 @@
-import type { FileLockManager } from '@php-wasm/node';
+import type { FileLockManager } from '@php-wasm/universal';
 import { loadNodeRuntime } from '@php-wasm/node';
 import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { RemoteAPI, SupportedPHPVersion } from '@php-wasm/universal';
 import {
 	PHPWorker,
+	bindUserSpace,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -294,11 +295,18 @@ function createPhpRuntimeFactory(
 			options.phpVersion || RecommendedPHPVersion,
 			{
 				emscriptenOptions: {
-					fileLockManager,
 					processId,
 					trace: options.trace ? tracePhpWasm : undefined,
 					phpWasmInitOptions: {
 						nativeInternalDirPath: options.nativeInternalDirPath,
+						bindUserSpace: (userSpaceContext) => {
+							return bindUserSpace(
+								{
+									fileLockManager,
+								},
+								userSpaceContext
+							);
+						},
 					},
 				},
 				followSymlinks: options.followSymlinks,
