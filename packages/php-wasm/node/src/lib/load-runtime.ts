@@ -20,7 +20,6 @@ import { joinPaths } from '@php-wasm/util';
 import { dirname } from 'path';
 
 export interface PHPLoaderOptions {
-	emscriptenOptions?: EmscriptenOptions;
 	followSymlinks?: boolean;
 	withXdebug?: boolean;
 	xdebug?: XdebugOptions;
@@ -61,7 +60,7 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
 		 */
 		nativeInternalDirPath?: string;
 	};
-};
+}
 
 /**
  * Does what load() does, but synchronously returns
@@ -72,7 +71,7 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
  */
 export async function loadNodeRuntime(
 	phpVersion: SupportedPHPVersion,
-	options: PHPLoaderOptionsForNode = {}
+	options: PHPLoaderOptions = {}
 ) {
 	// TODO: Throw an error if a file lock manager is provided but not a process ID.
 
