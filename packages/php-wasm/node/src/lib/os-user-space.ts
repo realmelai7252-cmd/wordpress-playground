@@ -535,6 +535,17 @@ export function bindUserSpace(
 					return -EINVAL;
 				}
 
+				const [nativeFd, nativeFdErrno] =
+					locking.get_native_fd_from_emscripten_fd(fd);
+				if (nativeFdErrno !== 0) {
+					js_wasm_trace(
+						'fcntl(%d, F_GETLK) get_native_fd_from_emscripten_fd errno %d',
+						fd,
+						nativeFdErrno
+					);
+					return -nativeFdErrno;
+				}
+
 				try {
 					const nativeFilePath =
 						locking.get_native_path_from_vfs_path(vfsPath);
@@ -546,6 +557,7 @@ export function bindUserSpace(
 								start: absoluteStartOffset,
 								end: absoluteStartOffset + flockStruct.l_len,
 								pid,
+								fd: nativeFd,
 							}
 						);
 					if (conflictingLock === undefined) {
@@ -666,6 +678,17 @@ export function bindUserSpace(
 
 				locking.maybeLockedFds.add(fd);
 
+				const [nativeFd, nativeFdErrno] =
+					locking.get_native_fd_from_emscripten_fd(fd);
+				if (nativeFdErrno !== 0) {
+					js_wasm_trace(
+						'fcntl(%d, F_SETLK) get_native_fd_from_emscripten_fd errno %d',
+						fd,
+						nativeFdErrno
+					);
+					return -nativeFdErrno;
+				}
+
 				const requestedLockType =
 					locking.fcntlToLockState[flockStruct.l_type];
 				const rangeLock: RequestedRangeLock = {
@@ -673,6 +696,7 @@ export function bindUserSpace(
 					start: absoluteStartOffset,
 					end: absoluteStartOffset + flockStruct.l_len,
 					pid,
+					fd: nativeFd,
 				};
 
 				try {
@@ -685,9 +709,11 @@ export function bindUserSpace(
 						rangeLock
 					);
 
+					const waitForLock = cmd === F_SETLKW;
 					const succeeded = fileLockManager.lockFileByteRange(
 						nativeFilePath,
-						rangeLock
+						rangeLock,
+						waitForLock
 					);
 
 					js_wasm_trace(
@@ -801,22 +827,8 @@ export function bindUserSpace(
 			return -paramsCheckErrno;
 		}
 
-		// @TODO: Consider supporting blocking mode of flock()
-		if ((op & LOCK_NB) === 0) {
-			js_wasm_trace(
-				'js_flock(%d, %d) blocking mode of flock() is not implemented',
-				fd,
-				op
-			);
-			// We do not yet support the blocking form of flock().
-			// We respond with EINVAL to indicate failure
-			// because it is a known errno for a failed blocking flock().
-			// return -EINVAL;
-			// TODO: Implement blocking mode of flock()
-			return 0;
-		}
-
 		const maskedOp = op & ((LOCK_SH | LOCK_EX | LOCK_UN) as FlockOp | 0);
+		const waitForLock = (op & LOCK_NB) === 0;
 
 		if (maskedOp === 0) {
 			js_wasm_trace('js_flock(%d, %d) invalid flock() operation', fd, op);
@@ -848,6 +860,7 @@ export function bindUserSpace(
 				type: lockOpType,
 				pid: pid,
 				fd: nativeFd,
+				waitForLock,
 			});
 			js_wasm_trace(
 				'js_flock(%d, %d) lockWholeFile %s returned %d',
@@ -939,7 +952,7 @@ export function bindUserSpace(
 			js_wasm_trace('fd_close(%d) %s release locks', fd, vfsPath);
 			const nativeFilePath =
 				locking.get_native_path_from_vfs_path(vfsPath);
-			fileLockManager.releaseLocksForProcessFd(
+			fileLockManager.releaseLocksOnFdClose(
 				pid,
 				nativeFd,
 				nativeFilePath

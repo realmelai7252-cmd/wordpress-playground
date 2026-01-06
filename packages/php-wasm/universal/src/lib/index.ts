@@ -99,4 +99,4 @@ export * from './api';
 export type { WithAPIState as WithIsReady } from './api';
 export type { Remote } from './comlink-sync';
 
-export type * from './file-lock-manager';
+export * from './file-lock-manager';
