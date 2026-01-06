@@ -2,10 +2,9 @@ import type {
 	SupportedPHPVersion,
 	EmscriptenOptions,
 	PHPRuntime,
-	OSUserSpaceAPI,
-	OSUserSpaceContext,
 } from '@php-wasm/universal';
-import { loadPHPRuntime, FSHelpers, bindUserSpace } from '@php-wasm/universal';
+import { loadPHPRuntime, FSHelpers } from '@php-wasm/universal';
+import type { OSUserSpaceAPI, OSUserSpaceContext } from './os-user-space';
 import fs from 'fs';
 import { getPHPLoaderModule } from '.';
 import { withNetworking } from './networking/with-networking';
@@ -71,7 +70,7 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
  */
 export async function loadNodeRuntime(
 	phpVersion: SupportedPHPVersion,
-	options: PHPLoaderOptions = {}
+	options: PHPLoaderOptionsForNode = {}
 ) {
 	// TODO: Throw an error if a file lock manager is provided but not a process ID.
 
@@ -83,14 +82,6 @@ export async function loadNodeRuntime(
 		 */
 		quit: function (code, error) {
 			throw error;
-		},
-		bindUserSpace: (userSpaceContext: OSUserSpaceContext) => {
-			return bindUserSpace(
-				{
-					fileLockManager: options?.fileLockManager,
-				},
-				userSpaceContext
-			);
 		},
 		...(options.emscriptenOptions || {}),
 		onRuntimeInitialized: (phpRuntime: PHPRuntime) => {

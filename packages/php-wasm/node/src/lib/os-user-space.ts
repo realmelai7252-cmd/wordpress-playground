@@ -1,11 +1,11 @@
 // TODO: Move file manager into kernel space.
 // TODO: Move FileLockManager into php-wasm/universal to resolve this
 import type {
+	Emscripten,
 	RequestedRangeLock,
 	WholeFileLock,
 	WholeFileLockOp,
-} from './file-lock-manager';
-import type { Emscripten } from './emscripten-types';
+} from '@php-wasm/universal';
 import type { OSKernelSpace } from './os-kernel-space';
 
 type FSNode = Emscripten.FS.FSNode;
@@ -129,7 +129,7 @@ export function bindUserSpace(
 			LOCK_NB,
 			LOCK_UN,
 		},
-		errnoCodes: { EBADF, EINVAL, EAGAIN, EDEADLK, EWOULDBLOCK },
+		errnoCodes: { EBADF, EINVAL, EAGAIN, EWOULDBLOCK, EDEADLK },
 		wasmImports: { builtin_fcntl64, builtin_fd_close, js_wasm_trace },
 		wasmExports: { wasm_get_end_offset },
 		syscalls: { getStreamFromFD },

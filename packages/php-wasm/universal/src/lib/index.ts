@@ -100,6 +100,3 @@ export type { WithAPIState as WithIsReady } from './api';
 export type { Remote } from './comlink-sync';
 
 export type * from './file-lock-manager';
-// TODO: Review exported names and improve if needed.
-export * from './os-user-space';
-export type * from './os-user-space';
