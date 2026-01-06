@@ -243,7 +243,10 @@ export function bindUserSpace(
 
 		get_native_fd_from_emscripten_fd(fd: number): ResultTuple<number> {
 			try {
-				const stream = getStreamFromFD(fd);
+				type MaybeNODEFSStream = Emscripten.FS.FSStream & {
+					nfd?: number;
+				};
+				const stream = getStreamFromFD(fd) as MaybeNODEFSStream;
 				if (stream.nfd === undefined) {
 					return [null as never, EBADF];
 				}
