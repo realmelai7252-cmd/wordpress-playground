@@ -241,6 +241,18 @@ export function bindUserSpace(
 			}
 		},
 
+		get_native_fd_from_emscripten_fd(fd: number): ResultTuple<number> {
+			try {
+				const stream = getStreamFromFD(fd);
+				if (stream.nfd === undefined) {
+					return [null as never, EBADF];
+				}
+				return [stream.nfd, 0];
+			} catch {
+				return [null as never, EBADF];
+			}
+		},
+
 		check_lock_params(fd: number, l_type: number) {
 			const accessMode = locking.get_fd_access_mode(fd);
 			if (
@@ -814,13 +826,25 @@ export function bindUserSpace(
 			return -EINVAL;
 		}
 
+		const [nativeFd, nativeFdErrno] =
+			locking.get_native_fd_from_emscripten_fd(fd);
+		if (nativeFdErrno !== 0) {
+			js_wasm_trace(
+				'js_flock(%d, %d) get_native_fd_from_emscripten_fd errno %d',
+				fd,
+				op,
+				nativeFdErrno
+			);
+			return -nativeFdErrno;
+		}
+
 		try {
 			const nativeFilePath =
 				locking.get_native_path_from_vfs_path(vfsPath);
 			const succeeded = fileLockManager.lockWholeFile(nativeFilePath, {
 				type: lockOpType,
 				pid: pid,
-				fd,
+				fd: nativeFd,
 			});
 			js_wasm_trace(
 				'js_flock(%d, %d) lockWholeFile %s returned %d',
@@ -849,10 +873,12 @@ export function bindUserSpace(
 			return builtin_fd_close(fd);
 		}
 
-		// We have to get the VFS path from the file descriptor
-		// before closing it.
+		// We have to get the VFS path and native fd from the Emscripten file
+		// descriptor before closing it.
 		const [vfsPath, vfsPathResolutionErrno] =
 			locking.get_vfs_path_from_fd(fd);
+		const [nativeFd, nativeFdErrno] =
+			locking.get_native_fd_from_emscripten_fd(fd);
 
 		const fdCloseResult = builtin_fd_close(fd);
 		if (fdCloseResult !== 0) {
@@ -893,6 +919,15 @@ export function bindUserSpace(
 			return fdCloseResult;
 		}
 
+		if (nativeFdErrno !== 0) {
+			js_wasm_trace(
+				'fd_close(%d) get_native_fd_from_emscripten_fd error %d',
+				fd,
+				nativeFdErrno
+			);
+			return fdCloseResult;
+		}
+
 		if (!locking.is_path_to_shared_fs(vfsPath)) {
 			return fdCloseResult;
 		}
@@ -901,7 +936,11 @@ export function bindUserSpace(
 			js_wasm_trace('fd_close(%d) %s release locks', fd, vfsPath);
 			const nativeFilePath =
 				locking.get_native_path_from_vfs_path(vfsPath);
-			fileLockManager.releaseLocksForProcessFd(pid, fd, nativeFilePath);
+			fileLockManager.releaseLocksForProcessFd(
+				pid,
+				nativeFd,
+				nativeFilePath
+			);
 			js_wasm_trace('fd_close(%d) %s release locks success', fd, vfsPath);
 		} catch (e) {
 			js_wasm_trace("fd_close(%d) %s error '%s'", fd, vfsPath, e);
