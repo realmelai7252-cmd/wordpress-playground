@@ -4,7 +4,6 @@ import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { RemoteAPI, SupportedPHPVersion } from '@php-wasm/universal';
 import {
 	PHPWorker,
-	bindUserSpace,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -15,7 +14,7 @@ import { RecommendedPHPVersion } from '@wp-playground/common';
 import {
 	type WordPressInstallMode,
 	bootRequestHandler,
-	bootWordPressAndRequestHandler,
+	bootWordPress,
 } from '@wp-playground/wordpress';
 import { rootCertificates } from 'tls';
 import { jspi } from 'wasm-feature-detect';
@@ -55,12 +54,15 @@ export type WorkerBootOptions = {
 	constants?: Record<string, string | number | boolean | null>;
 };
 
-export type PrimaryWorkerBootOptions = WorkerBootOptions & {
-	wordpressInstallMode: WordPressInstallMode;
+export type WorkerBootWordPressOptions = {
+	siteUrl: string;
 	wpVersion?: string;
+	wordpressInstallMode: WordPressInstallMode;
 	wordPressZip?: ArrayBuffer;
 	sqliteIntegrationPluginZip?: ArrayBuffer;
 	dataSqlPath?: string;
+	// Used to apply post-install mounts.
+	onWordPressInstalled: () => Promise<void>;
 };
 
 interface WorkerBootRequestHandlerOptions {
@@ -136,21 +138,14 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		}
 	}
 
-	async bootAndSetUpInitialWorker(options: PrimaryWorkerBootOptions) {
+	async bootWordPress(options: WorkerBootWordPressOptions) {
 		const {
 			siteUrl,
-			mountsBeforeWpInstall,
-			mountsAfterWpInstall,
 			wordpressInstallMode,
 			wordPressZip,
 			sqliteIntegrationPluginZip,
 			dataSqlPath,
-			internalCookieStore,
 		} = options;
-		if (this.booted) {
-			throw new Error('Playground already booted');
-		}
-		this.booted = true;
 
 		try {
 			// Start with CLI-provided constants (if any)
@@ -158,13 +153,8 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 				{
 					...(options.constants || {}),
 				};
-	releaseApiProxyBooted = false;
-			const requestHandler = await bootWordPressAndRequestHandler({
+			await bootWordPress(this.__internal_getRequestHandler()!, {
 				siteUrl,
-				createPhpRuntime: createPhpRuntimeFactory(
-					options,
-					this.fileLockManager!
-				),
 				wordpressInstallMode,
 				wordPressZip:
 					wordPressZip !== undefined
@@ -177,7 +167,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 								'sqlite-integration-plugin.zip'
 							)
 						: undefined,
-				sapiName: 'cli',
+				// TODO:
 				createFiles: {
 					'/internal/shared/ca-bundle.crt':
 						rootCertificates.join('\n'),
@@ -188,31 +178,12 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 					allow_url_fopen: '1',
 					disable_functions: '',
 				},
-				cookieStore: internalCookieStore ? undefined : false,
 				dataSqlPath,
-				spawnHandler: () =>
-					sandboxedSpawnHandlerFactory(() =>
-						createPHPWorker(options, this.fileLockManager!)
-					),
-				async onPHPInstanceCreated(php) {
-					await mountResources(php, mountsBeforeWpInstall);
-					if (wordpressBooted) {
-						await mountResources(php, mountsAfterWpInstall);
-					}
-				},
 			});
-			this.__internal_setRequestHandler(requestHandler);
-			wordpressBooted = true;
 
-			const primaryPhp = await requestHandler.getPrimaryPhp();
-			await this.setPrimaryPHP(primaryPhp);
-
-			// The primary PHP instance is persistent, so we need to apply
-			// post-install mounts now that WordPress has been booted.
-			// All secondary PHP instances created after WP boot will get
-			// these mounts automatically.
-			await mountResources(primaryPhp, mountsAfterWpInstall);
-
+			// Notify all workers to apply post-install mounts.
+			// TODO: Improve this name.
+			await options.onWordPressInstalled();
 			setApiReady();
 		} catch (e) {
 			setAPIError(e as Error);
@@ -237,6 +208,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		try {
 			const requestHandler = await bootRequestHandler({
 				siteUrl: options.siteUrl,
+				maxPhpInstances: 1,
 				createPhpRuntime: createPhpRuntimeFactory(
 					options,
 					this.fileLockManager!
@@ -264,6 +236,10 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		}
 	}
 
+	async mountAfterWordPressInstall(mounts: Array<Mount>) {
+		await mountResources(this.__internal_getPHP()!, mounts);
+	}
+
 	// Provide a named disposal method that can be invoked via comlink.
 	async dispose() {
 		await this[Symbol.asyncDispose]();
@@ -276,7 +252,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
  */
 function createPhpRuntimeFactory(
 	options: WorkerBootRequestHandlerOptions,
-	fileLockManager: FileLockManager | RemoteAPI<FileLockManager>
+	fileLockManager: FileLockManager
 ) {
 	let nextProcessId = options.firstProcessId;
 	const lastProcessId =
@@ -338,7 +314,7 @@ function createPhpRuntimeFactory(
  */
 async function createPHPWorker(
 	options: WorkerBootRequestHandlerOptions,
-	fileLockManager: FileLockManager | RemoteAPI<FileLockManager>
+	fileLockManager: FileLockManager
 ) {
 	const spawnedWorker = await spawnWorkerThread('v1');
 
