@@ -4,6 +4,7 @@ import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { RemoteAPI, SupportedPHPVersion } from '@php-wasm/universal';
 import {
 	PHPWorker,
+	apiReleaseProxy,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -61,8 +62,6 @@ export type WorkerBootWordPressOptions = {
 	wordPressZip?: ArrayBuffer;
 	sqliteIntegrationPluginZip?: ArrayBuffer;
 	dataSqlPath?: string;
-	// Used to apply post-install mounts.
-	onWordPressInstalled: () => Promise<void>;
 };
 
 interface WorkerBootRequestHandlerOptions {
@@ -138,7 +137,10 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		}
 	}
 
-	async bootWordPress(options: WorkerBootWordPressOptions) {
+	async bootWordPress(
+		options: WorkerBootWordPressOptions,
+		workerPostInstallMountsPort: MessagePort
+	) {
 		const {
 			siteUrl,
 			wordpressInstallMode,
@@ -182,8 +184,12 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 			});
 
 			// Notify all workers to apply post-install mounts.
-			// TODO: Improve this name.
-			await options.onWordPressInstalled();
+			const postInstall = consumeAPI<{
+				applyPostInstallMountsToAllWorkers: () => Promise<void>;
+			}>(workerPostInstallMountsPort);
+			await postInstall.applyPostInstallMountsToAllWorkers();
+			postInstall[apiReleaseProxy]();
+
 			setApiReady();
 		} catch (e) {
 			setAPIError(e as Error);

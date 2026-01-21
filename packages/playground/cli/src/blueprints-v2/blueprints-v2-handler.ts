@@ -48,7 +48,7 @@ export class BlueprintsV2Handler {
 
 	async bootWordPress(
 		phpPort: NodeMessagePort,
-		onWordPressInstalled: () => Promise<void>
+		workerPostInstallMountsPort: NodeMessagePort
 	) {
 		const playground: RemoteAPI<PlaygroundCliBlueprintV2Worker> =
 			consumeAPI(phpPort);
@@ -57,10 +57,13 @@ export class BlueprintsV2Handler {
 			command: this.args.command,
 			siteUrl: this.siteUrl,
 			blueprint: this.args.blueprint!,
-			onWordPressInstalled,
+			workerPostInstallMountsPort,
 		};
 
-		await playground.bootWordPress(workerBootArgs);
+		await playground.bootWordPress(
+			workerBootArgs,
+			workerPostInstallMountsPort
+		);
 		return playground;
 	}
 

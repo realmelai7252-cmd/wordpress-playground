@@ -13,6 +13,7 @@ import {
 	PHPExecutionFailureError,
 	PHPResponse,
 	PHPWorker,
+	apiReleaseProxy,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -137,7 +138,6 @@ export type WorkerWordPressBootArgs = Omit<
 		| RawBlueprintV2Data
 		| ParsedBlueprintV2String
 		| BlueprintV1Declaration;
-	onWordPressInstalled: () => Promise<void>;
 };
 
 type WorkerRunBlueprintArgs = Omit<
@@ -210,7 +210,10 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 		this.fileLockManager = await consumeAPISync<FileLockManager>(port);
 	}
 
-	async bootWordPress(args: WorkerWordPressBootArgs) {
+	async bootWordPress(
+		args: WorkerWordPressBootArgs,
+		workerPostInstallMountsPort: MessagePort
+	) {
 		// TODO: Should we move a process like this back into the
 		// `@wp-playground/wordpress` package?
 		const php = await this.__internal_getRequestHandler()!.getPrimaryPhp();
@@ -236,15 +239,19 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 		);
 
 		if (args.mode === 'mount-only') {
-			// TODO: Rename to associate more clearly with post-install mounts.
-			await args.onWordPressInstalled();
+			await this.applyPostInstallMountsToAllWorkers(
+				workerPostInstallMountsPort
+			);
 			return;
 		}
 
-		await this.runBlueprintV2({
-			// TODO: Do we really want to create a new object or can we pass args directly?
-			...args,
-		});
+		await this.runBlueprintV2(
+			{
+				// TODO: Do we really want to create a new object or can we pass args directly?
+				...args,
+			},
+			workerPostInstallMountsPort
+		);
 	}
 
 	async bootWorker(args: SecondaryWorkerBootArgs) {
@@ -286,7 +293,10 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 		});
 	}
 
-	async runBlueprintV2(args: WorkerRunBlueprintArgs) {
+	async runBlueprintV2(
+		args: WorkerRunBlueprintArgs,
+		workerPostInstallMountsPort: MessagePort
+	) {
 		const requestHandler = this.__internal_getRequestHandler()!;
 		const { php, reap } =
 			await requestHandler.instanceManager.acquirePHPInstance();
@@ -340,17 +350,9 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 						case 'blueprint.target_resolved': {
 							if (!this.blueprintTargetResolved) {
 								this.blueprintTargetResolved = true;
-								for (const php of this
-									.phpInstancesThatNeedMountsAfterTargetResolved) {
-									// console.log('mounting resources for php', php);
-									this.phpInstancesThatNeedMountsAfterTargetResolved.delete(
-										php
-									);
-									await mountResources(
-										php,
-										args.mountsAfterWpInstall || []
-									);
-								}
+								await this.applyPostInstallMountsToAllWorkers(
+									workerPostInstallMountsPort
+								);
 							}
 							break;
 						}
@@ -512,6 +514,16 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 
 	async mountAfterWordPressInstall(mounts: Array<Mount>) {
 		await mountResources(this.__internal_getPHP()!, mounts);
+	}
+
+	async applyPostInstallMountsToAllWorkers(
+		postInstallMountsPort: MessagePort
+	): Promise<void> {
+		const applyPostInstallMountsToAllWorkers = consumeAPI<
+			() => Promise<void>
+		>(postInstallMountsPort);
+		await applyPostInstallMountsToAllWorkers();
+		applyPostInstallMountsToAllWorkers[apiReleaseProxy]();
 	}
 
 	// Provide a named disposal method that can be invoked via comlink.

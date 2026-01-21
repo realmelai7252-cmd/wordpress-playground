@@ -4,12 +4,15 @@ import * as Comlink from './comlink-sync';
 import {
 	NodeSABSyncReceiveMessageTransport,
 	nodeEndpoint,
+	releaseProxy,
 	type NodeEndpoint,
 	type Remote,
 	type Endpoint,
 	type IsomorphicMessagePort,
 } from './comlink-sync';
 import * as ErrorSerializer from './serialize-error';
+
+export const apiReleaseProxy = releaseProxy;
 
 export type WithAPIState = {
 	/**
@@ -23,7 +26,8 @@ export type WithAPIState = {
 	 */
 	isReady: () => Promise<void>;
 };
-export type RemoteAPI<T> = Remote<T> & WithAPIState;
+export type RemoteAPI<T> = Remote<T> &
+	WithAPIState & { [apiReleaseProxy]: () => void };
 
 export async function consumeAPISync<APIType>(
 	remote: IsomorphicMessagePort
@@ -102,7 +106,7 @@ export type PublicAPI<Methods, PipedAPI = unknown> = RemoteAPI<
 export function exposeAPI<Methods, PipedAPI>(
 	apiMethods?: Methods,
 	pipedApi?: PipedAPI,
-	targetWorker?: NodeEndpoint
+	targetWorker?: NodeEndpoint | MessagePort
 ): [() => void, (e: Error) => void, PublicAPI<Methods, PipedAPI>] {
 	const { setReady, setFailed, exposedApi } = prepareForExpose(
 		apiMethods,
@@ -110,9 +114,13 @@ export function exposeAPI<Methods, PipedAPI>(
 	);
 	let endpoint: Endpoint | undefined;
 	if (targetWorker) {
-		// NOTE: If there are other target types, we could expand this later,
-		// but for now, we only need support for NodeEndpoints.
-		endpoint = nodeEndpoint(targetWorker);
+		if ((targetWorker as any)?.addEventListener) {
+			endpoint = targetWorker as Endpoint;
+		} else {
+			// NOTE: If there are other target types, we could expand this later,
+			// but for now, we only need support for NodeEndpoints.
+			endpoint = nodeEndpoint(targetWorker as NodeEndpoint);
+		}
 	} else {
 		endpoint =
 			typeof window !== 'undefined'

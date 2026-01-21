@@ -59,7 +59,7 @@ export class BlueprintsV1Handler {
 
 	async bootWordPress(
 		phpPort: NodeMessagePort,
-		onWordPressInstalled: () => Promise<void>
+		workerPostInstallMountsPort: NodeMessagePort
 	) {
 		let wpDetails: any = undefined;
 		let wordPressZip: any = undefined;
@@ -128,16 +128,19 @@ export class BlueprintsV1Handler {
 			this.getEffectiveBlueprint()
 		);
 
-		await playground.bootWordPress({
-			wpVersion: runtimeConfiguration.wpVersion,
-			siteUrl: this.siteUrl,
-			wordpressInstallMode:
-				this.args.wordpressInstallMode || 'download-and-install',
-			wordPressZip: wordPressZip && (await wordPressZip!.arrayBuffer()),
-			sqliteIntegrationPluginZip:
-				await sqliteIntegrationPluginZip?.arrayBuffer(),
-			onWordPressInstalled,
-		});
+		await playground.bootWordPress(
+			{
+				wpVersion: runtimeConfiguration.wpVersion,
+				siteUrl: this.siteUrl,
+				wordpressInstallMode:
+					this.args.wordpressInstallMode || 'download-and-install',
+				wordPressZip:
+					wordPressZip && (await wordPressZip!.arrayBuffer()),
+				sqliteIntegrationPluginZip:
+					await sqliteIntegrationPluginZip?.arrayBuffer(),
+			},
+			workerPostInstallMountsPort
+		);
 
 		if (
 			preinstalledWpContentPath &&

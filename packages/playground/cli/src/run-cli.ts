@@ -7,6 +7,7 @@ import type {
 } from '@php-wasm/universal';
 import {
 	PHPResponse,
+	exposeAPI,
 	exposeSyncAPI,
 	printDebugDetails,
 } from '@php-wasm/universal';
@@ -1288,6 +1289,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 							const firstProcessId =
 								workerIndex * processIdSpaceLength;
 
+							// TODO: Make sure the FileLockManager is exposed to proc_open/cli workers.
 							const fileLockManagerPort =
 								await exposeFileLockManager(fileLockManager);
 							const playgroundApi = await handler.bootPlayground({
@@ -1327,19 +1329,34 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 					const firstPlayground =
 						workerToPlaygroundMap.get(firstWorker)!;
 
-					await handler.bootWordPress(
-						firstWorker.phpPort,
-						async () => {
-							await Promise.all(
-								Array.from(workerToPlaygroundMap.values()).map(
-									(playground) =>
+					const messageChannelForPostInstallMounts =
+						new NodeMessageChannel();
+					const mainThreadPostInstallMountsPort =
+						messageChannelForPostInstallMounts.port1;
+					const workerPostInstallMountsPort =
+						messageChannelForPostInstallMounts.port2;
+					await exposeAPI(
+						{
+							applyPostInstallMountsToAllWorkers: async () => {
+								await Promise.all(
+									Array.from(
+										workerToPlaygroundMap.values()
+									).map((playground) =>
 										playground!.mountAfterWordPressInstall(
 											args['mount'] || []
 										)
-								)
-							);
-						}
+									)
+								);
+							},
+						},
+						undefined,
+						mainThreadPostInstallMountsPort
 					);
+					await handler.bootWordPress(
+						firstWorker.phpPort,
+						workerPostInstallMountsPort
+					);
+					mainThreadPostInstallMountsPort.close();
 
 					await firstPlayground!.isReady();
 					playground = firstPlayground;
