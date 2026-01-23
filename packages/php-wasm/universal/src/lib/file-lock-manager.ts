@@ -91,7 +91,13 @@ export type FileLockManager = {
 	releaseLocksOnFdClose: (pid: number, fd: number, path: Path) => void;
 };
 
-export type RequestedRangeLock = Readonly<{
+export type ByteRange = {
+	start: bigint;
+	// TODO: How to support special treatment of Infinity?
+	end: bigint;
+};
+
+export type RequestedRangeLock = ByteRange & {
 	/**
 	 * The type of lock request
 	 */
@@ -102,14 +108,15 @@ export type RequestedRangeLock = Readonly<{
 	 * using native OS file locking APIs.
 	 */
 	fd: Fd;
-	/** The start offset of the lock range */
-	start: bigint;
-	/** The end of the lock range */
-	// TODO: How to support special treatment of Infinity?
-	end: bigint;
 	/** The process ID that owns this lock */
 	pid: Pid;
-}>;
+};
+
+export type LockedRange = Omit<RequestedRangeLock, 'fd'> & {
+	type: Exclude<RequestedRangeLock['type'], 'unlocked'>;
+};
+
+export type ConflictingLockedRange = Omit<LockedRange, 'fd'>;
 
 export type WholeFileLock = Readonly<
 	WholeFileLock_Exclusive | WholeFileLock_Shared | WholeFileLock_Unlocked
