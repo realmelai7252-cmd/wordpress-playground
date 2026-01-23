@@ -84,6 +84,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -113,7 +114,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -133,7 +134,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -148,6 +149,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -157,7 +159,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -172,6 +174,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -181,7 +184,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -227,6 +230,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -256,7 +260,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -296,7 +300,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(true);
@@ -311,6 +315,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -320,7 +325,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(false);
@@ -335,6 +340,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -344,7 +350,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(true);
@@ -381,7 +387,7 @@ describe('FileLockManagerForNode', () => {
 				const result2 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result2).toBe(true);
@@ -409,7 +415,7 @@ describe('FileLockManagerForNode', () => {
 				const result3 = lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 				expect(result3).toBe(true);
@@ -427,6 +433,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -451,6 +458,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -475,6 +483,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -490,6 +499,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -503,6 +513,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -518,6 +529,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -531,6 +543,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -546,6 +559,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -559,6 +573,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -574,6 +589,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -587,6 +603,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -602,6 +619,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -615,6 +633,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -629,6 +648,7 @@ describe('FileLockManagerForNode', () => {
 							start: 0n,
 							end: 50n,
 							pid: 2,
+							fd: 2,
 						},
 						false
 					);
@@ -643,6 +663,7 @@ describe('FileLockManagerForNode', () => {
 							start: 100n,
 							end: 150n,
 							pid: 2,
+							fd: 2,
 						},
 						false
 					);
@@ -658,6 +679,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -671,6 +693,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -684,6 +707,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 200n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -699,6 +723,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -723,6 +748,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -747,6 +773,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -762,6 +789,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -775,6 +803,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -790,6 +819,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -803,6 +833,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -818,6 +849,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -831,6 +863,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -846,6 +879,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -859,6 +893,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -874,6 +909,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -887,6 +923,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -900,6 +937,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -915,6 +953,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -929,6 +968,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -943,6 +983,7 @@ describe('FileLockManagerForNode', () => {
 						start: 200n,
 						end: BigInt(Number.MAX_SAFE_INTEGER),
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -959,6 +1000,7 @@ describe('FileLockManagerForNode', () => {
 							start: 0n,
 							end: 100n,
 							pid: 1,
+							fd: 1,
 						},
 						false
 					)
@@ -974,6 +1016,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -987,6 +1030,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -999,6 +1043,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1014,6 +1059,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1027,6 +1073,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1039,6 +1086,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1054,6 +1102,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1066,6 +1115,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1079,6 +1129,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1091,6 +1142,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1105,6 +1157,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1118,6 +1171,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1130,6 +1184,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1142,6 +1197,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1157,6 +1213,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1170,6 +1227,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1182,6 +1240,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1194,6 +1253,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1209,6 +1269,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 200n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1222,6 +1283,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1234,6 +1296,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1246,6 +1309,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 50n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1258,6 +1322,7 @@ describe('FileLockManagerForNode', () => {
 						start: 150n,
 						end: 200n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1273,6 +1338,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1286,6 +1352,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 100n,
 						pid: 1,
+						fd: 1,
 					},
 					false
 				);
@@ -1298,6 +1365,7 @@ describe('FileLockManagerForNode', () => {
 						start: 100n,
 						end: 200n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1315,6 +1383,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1327,6 +1396,7 @@ describe('FileLockManagerForNode', () => {
 						start: 50n,
 						end: 150n,
 						pid: 2,
+						fd: 2,
 					}
 				);
 
@@ -1343,6 +1413,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1355,6 +1426,7 @@ describe('FileLockManagerForNode', () => {
 						start: 150n,
 						end: 250n,
 						pid: 2,
+						fd: 2,
 					}
 				);
 
@@ -1380,6 +1452,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					}
 				);
 
@@ -1410,6 +1483,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					}
 				);
 
@@ -1440,6 +1514,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 100n,
 						pid: 2,
+						fd: 2,
 					}
 				);
 
@@ -1461,6 +1536,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1471,6 +1547,7 @@ describe('FileLockManagerForNode', () => {
 					start: 200n,
 					end: 300n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1482,6 +1559,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 300n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				));
@@ -1494,6 +1572,7 @@ describe('FileLockManagerForNode', () => {
 					start: 50n,
 					end: 150n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1505,6 +1584,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 300n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				));
@@ -1521,6 +1601,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 300n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1532,6 +1613,7 @@ describe('FileLockManagerForNode', () => {
 						start: 0n,
 						end: 200n,
 						pid: 2,
+						fd: 2,
 					},
 					false
 				);
@@ -1552,7 +1634,7 @@ describe('FileLockManagerForNode', () => {
 				!(await lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				}));
 			expect(exclusiveLockAppearsToBeHeld).toBe(true);
@@ -1568,7 +1650,7 @@ describe('FileLockManagerForNode', () => {
 				{
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				}
 			));
@@ -1580,14 +1662,14 @@ describe('FileLockManagerForNode', () => {
 				await lockManager.lockWholeFile(TEST_FILE1, {
 					type: 'shared',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 			const sharedLockAppearsToBeReleased =
 				await lockManager.lockWholeFile(TEST_FILE2, {
 					type: 'exclusive',
 					pid: 2,
-					fd: 1,
+					fd: 2,
 					waitForLock: false,
 				});
 
@@ -1604,6 +1686,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 50n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1615,6 +1698,7 @@ describe('FileLockManagerForNode', () => {
 					start: 50n,
 					end: 100n,
 					pid: 2,
+					fd: 2,
 				},
 				false
 			);
@@ -1630,6 +1714,7 @@ describe('FileLockManagerForNode', () => {
 					start: 50n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1740,6 +1825,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1763,6 +1849,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1786,6 +1873,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
@@ -1809,6 +1897,7 @@ describe('FileLockManagerForNode', () => {
 					start: 0n,
 					end: 100n,
 					pid: 1,
+					fd: 1,
 				},
 				false
 			);
