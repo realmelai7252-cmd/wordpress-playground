@@ -9,10 +9,13 @@ import {
 	type Remote,
 	type Endpoint,
 	type IsomorphicMessagePort,
+	type ProxyMethods,
 } from './comlink-sync';
 import * as ErrorSerializer from './serialize-error';
 
-export const apiReleaseProxy = releaseProxy;
+// NOTE: It seems like we wouldn't have to explicitly specify
+// symbol type here, but it seems to resolve some type errors.
+export const apiReleaseProxy: typeof releaseProxy = releaseProxy;
 
 export type WithAPIState = {
 	/**
@@ -26,8 +29,7 @@ export type WithAPIState = {
 	 */
 	isReady: () => Promise<void>;
 };
-export type RemoteAPI<T> = Remote<T> &
-	WithAPIState & { [apiReleaseProxy]: () => void };
+export type RemoteAPI<T> = Remote<T> & ProxyMethods & WithAPIState;
 
 export async function consumeAPISync<APIType>(
 	remote: IsomorphicMessagePort
