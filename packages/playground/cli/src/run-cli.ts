@@ -933,11 +933,12 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 
 	// Declare file lock manager outside scope of startServer
 	// so we can look at it when debugging request handling.
+	// TODO: Replace this with required prebuilt package for fs-ext-extra-prebuilt
 	const nativeFlockSync =
 		os.platform() === 'win32'
 			? // @TODO: Enable fs-ext here when it works with Windows.
 				undefined
-			: await import('fs-ext')
+			: await import('fs-ext-extra-prebuilt')
 					.then((m) => m.flockSync)
 					.catch(() => {
 						// Only show this in debug mode since it's technical and
