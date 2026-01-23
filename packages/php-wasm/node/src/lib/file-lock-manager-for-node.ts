@@ -93,7 +93,8 @@ export class FileLockManagerForNode implements FileLockManager {
 	 */
 	lockFileByteRange(
 		path: string,
-		requestedLock: RequestedRangeLock
+		requestedLock: RequestedRangeLock,
+		waitForLock: boolean
 	): boolean {
 		// TODO: Conditionally assert that the passed FD is a valid native FD
 
@@ -709,7 +710,7 @@ class IntervalNode {
 	}
 }
 
-class FileLockIntervalTree {
+export class FileLockIntervalTree {
 	private root: IntervalNode | null = null;
 
 	isEmpty() {
