@@ -8,7 +8,6 @@ import type {
 } from '@php-wasm/universal';
 import { MAX_ADDRESSABLE_FILE_OFFSET } from '@php-wasm/universal';
 import { constants, fcntlSync, flockSync } from 'fs-ext-extra-prebuilt';
-import { logger } from '@php-wasm/logger';
 
 export class FileLockManagerForPosix implements FileLockManager {
 	// TODO: Move path of whole file lock into leaf. It is never used for lookup.
@@ -16,10 +15,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 	rangeLockedFds = new Map<Pid, Map<Path, Set<Fd>>>();
 
 	lockWholeFile(path: string, op: WholeFileLockOp): boolean {
-		logger.debug(
-			`[POSIX] lockWholeFile: path=${path}, type=${op.type}, pid=${op.pid}, fd=${op.fd}`
-		);
-
 		const opType =
 			op.type === 'unlock'
 				? 'un'
@@ -33,7 +28,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 
 		try {
 			flockSync(op.fd, opType);
-			logger.debug(`[POSIX] lockWholeFile: flock(${opType}) succeeded`);
 
 			// Remember lock so we can release them
 			// when the process exits or the file descriptor is closed.
@@ -50,10 +44,7 @@ export class FileLockManagerForPosix implements FileLockManager {
 			}
 
 			return true;
-		} catch (e) {
-			logger.debug(
-				`[POSIX] lockWholeFile: flock(${opType}) failed: ${e}`
-			);
+		} catch {
 			// TODO: Catch and report errors unrelated to flock() denials.
 			return false;
 		}
@@ -64,11 +55,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 		op: RequestedRangeLock,
 		waitForLock: boolean
 	): boolean {
-		logger.debug(
-			`[POSIX] lockFileByteRange: path=${path}, type=${op.type}, ` +
-				`pid=${op.pid}, fd=${op.fd}, range=${op.start}-${op.end}, wait=${waitForLock}`
-		);
-
 		if (op.start === op.end) {
 			/*
 			 * Treat a range with zero length as covering the entire remaining range.
@@ -80,9 +66,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 				...op,
 				end: MAX_ADDRESSABLE_FILE_OFFSET,
 			};
-			logger.debug(
-				`[POSIX] lockFileByteRange: expanded zero-length range to 0-${MAX_ADDRESSABLE_FILE_OFFSET}`
-			);
 		}
 
 		const fcntlCmd = waitForLock ? 'setlkw' : 'setlk';
@@ -102,9 +85,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 				Number(op.start),
 				Number(op.end - op.start)
 			);
-			logger.debug(
-				`[POSIX] lockFileByteRange: fcntl(${fcntlCmd}, ${fcntlOp}) succeeded`
-			);
 
 			// Remember that we have seen range locks for this PID and FD.
 			// It should be enough to release all locks with a single fcntl() call
@@ -119,10 +99,7 @@ export class FileLockManagerForPosix implements FileLockManager {
 			pidMap.get(path)!.add(op.fd);
 
 			return true;
-		} catch (e) {
-			logger.debug(
-				`[POSIX] lockFileByteRange: fcntl(${fcntlCmd}, ${fcntlOp}) failed: ${e}`
-			);
+		} catch {
 			// TODO: Catch and report errors unrelated to fcntl() denials.
 			return false;
 		}
@@ -132,15 +109,7 @@ export class FileLockManagerForPosix implements FileLockManager {
 		path: string,
 		op: RequestedRangeLock
 	): ReturnType<FileLockManager['findFirstConflictingByteRangeLock']> {
-		logger.debug(
-			`[POSIX] findFirstConflictingByteRangeLock: path=${path}, type=${op.type}, ` +
-				`pid=${op.pid}, range=${op.start}-${op.end}`
-		);
-
 		if (op.type === 'unlocked') {
-			logger.debug(
-				`[POSIX] findFirstConflictingByteRangeLock: unlock request, no conflict possible`
-			);
 			return undefined;
 		}
 
@@ -153,15 +122,9 @@ export class FileLockManagerForPosix implements FileLockManager {
 		const obtainedLock = this.lockFileByteRange(path, op, false);
 		if (obtainedLock) {
 			this.lockFileByteRange(path, { ...op, type: 'unlocked' }, true);
-			logger.debug(
-				`[POSIX] findFirstConflictingByteRangeLock: no conflict (test lock succeeded)`
-			);
 			return undefined;
 		}
 
-		logger.debug(
-			`[POSIX] findFirstConflictingByteRangeLock: conflict detected (test lock failed)`
-		);
 		// Since we cannot obtain a lock, assume there is a conflicting lock.
 		// Since we query what lock conflicts
 		// until our fs-ext fork fixes that, let's report that the entire range is locked.
@@ -174,8 +137,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 	}
 
 	releaseLocksForProcess(targetPid: number): void {
-		logger.debug(`[POSIX] releaseLocksForProcess: pid=${targetPid}`);
-
 		for (const [path, pidMap] of this.wholeFileLockMap.entries()) {
 			const fdMap = pidMap.get(targetPid);
 			if (!fdMap) {
@@ -183,9 +144,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 			}
 
 			for (const op of fdMap.values()) {
-				logger.debug(
-					`[POSIX] releaseLocksForProcess: releasing whole-file lock on ${path}, fd=${op.fd}`
-				);
 				// TODO: Log any errors.
 				// TODO: Does a failure here justify throwing an error (and conceding total brokenness)?
 				this.lockWholeFile(path, { ...op, type: 'unlock' });
@@ -196,9 +154,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 
 		for (const [path, fdSet] of this.rangeLockedFds.get(targetPid) ?? []) {
 			for (const fd of fdSet) {
-				logger.debug(
-					`[POSIX] releaseLocksForProcess: releasing range locks on ${path}, fd=${fd}`
-				);
 				/*
 				 * fcntl() lets us request to unlock the entire byte range for this process,
 				 * so we do that instead of tracking and unlocking specific ranges.
@@ -227,10 +182,6 @@ export class FileLockManagerForPosix implements FileLockManager {
 		targetFd: number,
 		targetPath: string
 	): void {
-		logger.debug(
-			`[POSIX] releaseLocksOnFdClose: pid=${targetPid}, fd=${targetFd}, path=${targetPath}`
-		);
-
 		// Do nothing because the native OS is responsible for releasing
 		// whole-file locks when the FD is closed.
 

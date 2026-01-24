@@ -11,7 +11,6 @@ import {
 	type LockedRange,
 } from './file-lock-manager';
 import { FileLockIntervalTree } from './file-lock-interval-tree';
-import { logger } from '@php-wasm/logger';
 
 /**
  * This is the file lock manager for use within JS runtimes like Node.js.
@@ -48,15 +47,8 @@ export class FileLockManagerInMemory implements FileLockManager {
 		 */
 		op: Omit<WholeFileLockOp, 'waitForLock'>
 	): boolean {
-		logger.debug(
-			`[InMemory] lockWholeFile: path=${path}, type=${op.type}, pid=${op.pid}, fd=${op.fd}`
-		);
-
 		if (this.locks.get(path) === undefined) {
 			if (op.type === 'unlock') {
-				logger.debug(
-					`[InMemory] lockWholeFile: no lock exists, unlock is no-op`
-				);
 				return true;
 			}
 
@@ -65,9 +57,6 @@ export class FileLockManagerInMemory implements FileLockManager {
 
 		const lock = this.locks.get(path)!;
 		const result = lock.lockWholeFile(op);
-		logger.debug(
-			`[InMemory] lockWholeFile: result=${result ? 'granted' : 'denied'}`
-		);
 		this.forgetPathIfUnlocked(path);
 		return result;
 	}
@@ -94,28 +83,16 @@ export class FileLockManagerInMemory implements FileLockManager {
 		 */
 		// waitForLock: boolean,
 	): boolean {
-		logger.debug(
-			`[InMemory] lockFileByteRange: path=${path}, type=${requestedLock.type}, ` +
-				`pid=${requestedLock.pid}, range=${requestedLock.start}-${requestedLock.end}`
-		);
-
 		if (!this.locks.has(path)) {
 			if (requestedLock.type === 'unlocked') {
 				// There is no existing lock. This is a no-op.
-				logger.debug(
-					`[InMemory] lockFileByteRange: no lock exists, unlock is no-op`
-				);
 				return true;
 			}
 
 			this.locks.set(path, new FileLock());
 		}
 		const lock = this.locks.get(path)!;
-		const result = lock.lockFileByteRange(requestedLock);
-		logger.debug(
-			`[InMemory] lockFileByteRange: result=${result ? 'granted' : 'denied'}`
-		);
-		return result;
+		return lock.lockFileByteRange(requestedLock);
 	}
 
 	/**
@@ -133,29 +110,11 @@ export class FileLockManagerInMemory implements FileLockManager {
 		 */
 		desiredLock: Omit<RequestedRangeLock, 'fd'>
 	): Omit<RequestedRangeLock, 'fd'> | undefined {
-		logger.debug(
-			`[InMemory] findFirstConflictingByteRangeLock: path=${path}, type=${desiredLock.type}, ` +
-				`pid=${desiredLock.pid}, range=${desiredLock.start}-${desiredLock.end}`
-		);
-
 		const lock = this.locks.get(path);
 		if (lock === undefined) {
-			logger.debug(
-				`[InMemory] findFirstConflictingByteRangeLock: no locks exist for path`
-			);
 			return undefined;
 		}
-		const conflict = lock.findFirstConflictingByteRangeLock(desiredLock);
-		if (conflict) {
-			logger.debug(
-				`[InMemory] findFirstConflictingByteRangeLock: found conflict`
-			);
-		} else {
-			logger.debug(
-				`[InMemory] findFirstConflictingByteRangeLock: no conflict`
-			);
-		}
-		return conflict;
+		return lock.findFirstConflictingByteRangeLock(desiredLock);
 	}
 
 	/**
@@ -164,11 +123,8 @@ export class FileLockManagerInMemory implements FileLockManager {
 	 * @param pid The process ID to release locks for.
 	 */
 	releaseLocksForProcess(pid: number) {
-		logger.debug(`[InMemory] releaseLocksForProcess: pid=${pid}`);
+		//logger.log('releaseLocksForProcess', pid);
 		for (const [path, lock] of this.locks.entries()) {
-			logger.debug(
-				`[InMemory] releaseLocksForProcess: releasing locks on ${path}`
-			);
 			lock.releaseLocksForProcess(pid);
 			this.forgetPathIfUnlocked(path);
 		}
@@ -182,15 +138,8 @@ export class FileLockManagerInMemory implements FileLockManager {
 	 * @param path The path to the file to release locks for.
 	 */
 	releaseLocksOnFdClose(pid: number, fd: number, nativePath: string) {
-		logger.debug(
-			`[InMemory] releaseLocksOnFdClose: pid=${pid}, fd=${fd}, path=${nativePath}`
-		);
-
 		const lock = this.locks.get(nativePath);
 		if (!lock) {
-			logger.debug(
-				`[InMemory] releaseLocksOnFdClose: no locks exist for path`
-			);
 			return;
 		}
 		lock.releaseLocksOnFdClose(pid, fd);
