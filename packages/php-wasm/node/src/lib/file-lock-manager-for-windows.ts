@@ -13,10 +13,8 @@ import type {
 	Fd,
 	Path,
 } from '@php-wasm/universal';
-import {
-	FileLockIntervalTree,
-	MAX_ADDRESSABLE_FILE_OFFSET,
-} from '@php-wasm/universal';
+import { MAX_ADDRESSABLE_FILE_OFFSET } from '@php-wasm/universal';
+import { FileLockIntervalTree } from './file-lock-manager-for-node';
 
 function toLowAndHigh32BitNumbers(num: bigint): [number, number] {
 	const low = Number(num & 0xffffffffn);
@@ -420,7 +418,12 @@ export class FileLockManagerForWindows implements FileLockManager {
 			// TODO: Quote spec and link to it.
 			this.lockFileByteRange(
 				targetPath,
-				{ ...op, type: 'unlocked' },
+				{
+					...op,
+					type: 'unlocked',
+					// TODO: Say why using dummy FD
+					fd: -1,
+				},
 				false
 			);
 			lockedRangeTree!.remove(op);

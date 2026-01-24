@@ -64,6 +64,7 @@ import {
 } from '@php-wasm/cli-util';
 import { createHash } from 'crypto';
 import { CLIOutput } from './cli-output';
+import { jspi } from 'wasm-feature-detect';
 
 // Inlined worker URLs for static analysis by downstream bundlers
 // These are replaced at build time by the Vite plugin in vite.config.ts
@@ -950,7 +951,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 						);
 						return undefined;
 					});
-	const fileLockManager = new FileLockManagerForNode(nativeFlockSync);
+	const fileLockManager = new FileLockManagerForNode();
 
 	let wordPressReady = false;
 	let isFirstRequest = true;

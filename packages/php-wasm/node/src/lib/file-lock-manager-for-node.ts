@@ -1,5 +1,6 @@
 import { logger } from '@php-wasm/logger';
 import { openSync, closeSync } from 'fs';
+import { platform } from 'os';
 
 type NativeFlockSync = (
 	fd: number,
@@ -17,6 +18,8 @@ import type {
 	ByteRange,
 	ConflictingLockedRange,
 } from '@php-wasm/universal';
+import { FileLockManagerForPosix } from './file-lock-manager-for-posix';
+import { FileLockManagerForWindows } from './file-lock-manager-for-windows';
 
 type LockMode = 'exclusive' | 'shared' | 'unlock';
 
@@ -35,7 +38,7 @@ const MAX_64BIT_OFFSET = BigInt(2n ** 64n - 1n);
  * It provides methods for locking and unlocking files, as well as finding conflicting locks.
  */
 export class FileLockManagerForNode implements FileLockManager {
-	nativeFlockSync: NativeFlockSync;
+	nativeFileLockManager: FileLockManager;
 	locks: Map<string, FileLock>;
 
 	/**
@@ -43,12 +46,11 @@ export class FileLockManagerForNode implements FileLockManager {
 	 *
 	 * @param nativeFlockSync A synchronous flock() function to lock files via the host OS.
 	 */
-	constructor(
-		nativeFlockSync: NativeFlockSync = function flockSyncNoOp() {
-			/* do nothing */
-		}
-	) {
-		this.nativeFlockSync = nativeFlockSync;
+	constructor(nativeFileLockManager?: FileLockManager) {
+		this.nativeFileLockManager =
+			(nativeFileLockManager ?? platform() === 'win32')
+				? new FileLockManagerForWindows()
+				: new FileLockManagerForPosix();
 		this.locks = new Map();
 	}
 
