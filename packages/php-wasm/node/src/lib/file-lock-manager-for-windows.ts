@@ -13,8 +13,10 @@ import type {
 	Fd,
 	Path,
 } from '@php-wasm/universal';
-import { MAX_ADDRESSABLE_FILE_OFFSET } from '@php-wasm/universal';
-import { FileLockIntervalTree } from './file-lock-manager-for-node';
+import {
+	MAX_ADDRESSABLE_FILE_OFFSET,
+	FileLockIntervalTree,
+} from '@php-wasm/universal';
 
 function toLowAndHigh32BitNumbers(num: bigint): [number, number] {
 	const low = Number(num & 0xffffffffn);

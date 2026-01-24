@@ -1,4 +1,5 @@
-// TODO: Move file manager into kernel space.
+// TODO: Document why we use the term "user space" for this file.
+// TODO: Rename this module to php-wasm-user-space.ts.
 // TODO: Move FileLockManager into php-wasm/universal to resolve this
 import type {
 	Emscripten,
@@ -160,14 +161,15 @@ export function bindUserSpace(
 
 	type FcntlLockState = typeof F_RDLCK | typeof F_WRLCK | typeof F_UNLCK;
 	const locking = {
-		/*
-		 * This is a set of possibly locked file descriptors.
-		 *
-		 * When a file descriptor is closed, we need to release any associated held by this process.
-		 * Instead of trying remember and forget file descriptors as they are locked and unlocked,
-		 * we just track file descriptors we have locked before and try an unlock when they are closed.
-		 */
-		maybeLockedFds: new Set(),
+		// TODO: Does it make sense to drop or keep maybeLockedFds?
+		// /*
+		//  * This is a set of possibly locked file descriptors.
+		//  *
+		//  * When a file descriptor is closed, we need to release any associated held by this process.
+		//  * Instead of trying remember and forget file descriptors as they are locked and unlocked,
+		//  * we just track file descriptors we have locked before and try an unlock when they are closed.
+		//  */
+		// maybeLockedFds: new Set(),
 
 		lockStateToFcntl: {
 			shared: F_RDLCK,
@@ -676,7 +678,8 @@ export function bindUserSpace(
 					return -paramsCheckErrno;
 				}
 
-				locking.maybeLockedFds.add(fd);
+				// TODO: Do we need to keep or drop maybeLockedFds?
+				// locking.maybeLockedFds.add(fd);
 
 				const [nativeFd, nativeFdErrno] =
 					locking.get_native_fd_from_emscripten_fd(fd);
@@ -773,10 +776,10 @@ export function bindUserSpace(
 	}
 
 	function flock(fd: number, op: number) {
-		js_wasm_trace('js_flock(%d, %d)', fd, op);
+		js_wasm_trace('flock(%d, %d)', fd, op);
 		if (!fileLockManager) {
 			js_wasm_trace(
-				'js_flock(%d, %d) file lock manager is not available. ' +
+				'flock(%d, %d) file lock manager is not available. ' +
 					'succeed by default as Emscripten does.',
 				fd,
 				op
@@ -794,7 +797,7 @@ export function bindUserSpace(
 		const [vfsPath, vfsPathErrno] = locking.get_vfs_path_from_fd(fd);
 		if (vfsPathErrno !== 0) {
 			js_wasm_trace(
-				'js_flock(%d, %d) get_vfs_path_from_fd errno %d',
+				'flock(%d, %d) get_vfs_path_from_fd errno %d',
 				fd,
 				op,
 				vfsPath,
@@ -818,7 +821,7 @@ export function bindUserSpace(
 		const paramsCheckErrno = locking.check_lock_params(fd, op);
 		if (paramsCheckErrno !== 0) {
 			js_wasm_trace(
-				'js_flock(%d, %d) %s check_lock_params errno %d',
+				'flock(%d, %d) %s check_lock_params errno %d',
 				fd,
 				op,
 				vfsPath,
@@ -831,13 +834,13 @@ export function bindUserSpace(
 		const waitForLock = (op & LOCK_NB) === 0;
 
 		if (maskedOp === 0) {
-			js_wasm_trace('js_flock(%d, %d) invalid flock() operation', fd, op);
+			js_wasm_trace('flock(%d, %d) invalid flock() operation', fd, op);
 			return -EINVAL;
 		}
 
 		const lockOpType = flockToLockOpType[maskedOp as FlockOp];
 		if (lockOpType === undefined) {
-			js_wasm_trace('js_flock(%d, %d) invalid flock() operation', fd, op);
+			js_wasm_trace('flock(%d, %d) invalid flock() operation', fd, op);
 			return -EINVAL;
 		}
 
@@ -863,18 +866,19 @@ export function bindUserSpace(
 				waitForLock,
 			});
 			js_wasm_trace(
-				'js_flock(%d, %d) lockWholeFile %s returned %d',
+				'flock(%d, %d) lockWholeFile %s returned %d',
 				fd,
 				op,
 				vfsPath,
 				succeeded
 			);
-			if (succeeded) {
-				locking.maybeLockedFds.add(fd);
-			}
+			// TODO: Do we need to keep or drop maybeLockedFds?
+			// if (succeeded) {
+			// 	locking.maybeLockedFds.add(fd);
+			// }
 			return succeeded ? 0 : -EWOULDBLOCK;
 		} catch (e) {
-			js_wasm_trace('js_flock(%d, %d) lockWholeFile error %s', fd, op, e);
+			js_wasm_trace('flock(%d, %d) lockWholeFile error %s', fd, op, e);
 			return -EINVAL;
 		}
 	}
@@ -906,15 +910,16 @@ export function bindUserSpace(
 			);
 			return fdCloseResult;
 		}
-		if (!locking.maybeLockedFds.has(fd)) {
-			js_wasm_trace(
-				'fd_close(%d) not in maybe-locked-list %s result %d',
-				fd,
-				vfsPath,
-				fdCloseResult
-			);
-			return fdCloseResult;
-		}
+		// TODO: Do we need to keep or drop maybeLockedFds?
+		// if (!locking.maybeLockedFds.has(fd)) {
+		// 	js_wasm_trace(
+		// 		'fd_close(%d) not in maybe-locked-list %s result %d',
+		// 		fd,
+		// 		vfsPath,
+		// 		fdCloseResult
+		// 	);
+		// 	return fdCloseResult;
+		// }
 
 		if (vfsPathResolutionErrno !== 0) {
 			js_wasm_trace(

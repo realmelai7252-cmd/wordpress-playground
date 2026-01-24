@@ -35,10 +35,12 @@ import {
 import { startServer } from './start-server';
 import type { PlaygroundCliBlueprintV1Worker } from './blueprints-v1/worker-thread-v1';
 import type { PlaygroundCliBlueprintV2Worker } from './blueprints-v2/worker-thread-v2';
-import { FileLockManagerForNode } from '@php-wasm/node';
 import { LoadBalancer } from './load-balancer';
 /* eslint-disable no-console */
-import { SupportedPHPVersions } from '@php-wasm/universal';
+import {
+	SupportedPHPVersions,
+	FileLockManagerInMemory,
+} from '@php-wasm/universal';
 import { cpus } from 'os';
 import type { MessagePort as NodeMessagePort } from 'worker_threads';
 import yargs, { type Argv, type Options as YargsOptions } from 'yargs';
@@ -951,7 +953,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 						);
 						return undefined;
 					});
-	const fileLockManager = new FileLockManagerForNode();
+	const fileLockManager = new FileLockManagerInMemory();
 
 	let wordPressReady = false;
 	let isFirstRequest = true;
@@ -1646,7 +1648,7 @@ export function spawnWorkerThread(
  * @see comlink-sync.ts
  * @see phpwasm-emscripten-library-file-locking-for-node.js
  */
-async function exposeFileLockManager(fileLockManager: FileLockManagerForNode) {
+async function exposeFileLockManager(fileLockManager: FileLockManagerInMemory) {
 	const { port1, port2 } = new NodeMessageChannel();
 	/**
 	 * Always expose a synchronous API for the file lock manager

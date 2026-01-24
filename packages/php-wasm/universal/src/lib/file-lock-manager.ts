@@ -112,7 +112,7 @@ export type RequestedRangeLock = ByteRange & {
 	pid: Pid;
 };
 
-export type LockedRange = Omit<RequestedRangeLock, 'fd'> & {
+export type LockedRange = RequestedRangeLock & {
 	type: Exclude<RequestedRangeLock['type'], 'unlocked'>;
 };
 
