@@ -100,6 +100,7 @@ export type { WithAPIState as WithIsReady } from './api';
 
 export * from './file-lock-manager';
 export * from './file-lock-manager-in-memory';
+export * from './file-lock-manager-composite';
 export * from './file-lock-interval-tree';
 
 // TODO: Review exported names and improve if needed.
