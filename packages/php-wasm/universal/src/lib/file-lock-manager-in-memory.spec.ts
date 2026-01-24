@@ -5,7 +5,7 @@ import type { WholeFileLockOp } from '../lib/file-lock-manager';
 const TEST_FILE1 = new URL('test1.txt', import.meta.url).pathname;
 const TEST_FILE2 = new URL('test2.txt', import.meta.url).pathname;
 
-describe('FileLockManagerForNode', () => {
+describe('FileLockManagerInMemory', () => {
 	let lockManager: FileLockManagerInMemory;
 
 	beforeEach(() => {

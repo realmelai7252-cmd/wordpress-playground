@@ -4,7 +4,7 @@ import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { RemoteAPI, SupportedPHPVersion } from '@php-wasm/universal';
 import {
 	PHPWorker,
-	apiReleaseProxy,
+	releaseApiProxy,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -188,7 +188,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 				applyPostInstallMountsToAllWorkers: () => Promise<void>;
 			}>(workerPostInstallMountsPort);
 			await postInstall.applyPostInstallMountsToAllWorkers();
-			postInstall[apiReleaseProxy]();
+			postInstall[releaseApiProxy]();
 
 			setApiReady();
 		} catch (e) {

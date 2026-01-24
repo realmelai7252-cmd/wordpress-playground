@@ -13,7 +13,7 @@ import {
 	PHPExecutionFailureError,
 	PHPResponse,
 	PHPWorker,
-	apiReleaseProxy,
+	releaseApiProxy,
 	consumeAPI,
 	consumeAPISync,
 	exposeAPI,
@@ -523,7 +523,7 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 			() => Promise<void>
 		>(postInstallMountsPort);
 		await applyPostInstallMountsToAllWorkers();
-		applyPostInstallMountsToAllWorkers[apiReleaseProxy]();
+		applyPostInstallMountsToAllWorkers[releaseApiProxy]();
 	}
 
 	// Provide a named disposal method that can be invoked via comlink.

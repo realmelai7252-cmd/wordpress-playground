@@ -19,7 +19,7 @@ import * as ErrorSerializer from './serialize-error';
 
 // NOTE: It seems like we wouldn't have to explicitly specify
 // symbol type here, but it seems to resolve some type errors.
-export const apiReleaseProxy: typeof releaseProxy = releaseProxy;
+export const releaseApiProxy: typeof releaseProxy = releaseProxy;
 
 export type WithAPIState = {
 	/**
