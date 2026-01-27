@@ -1,9 +1,10 @@
-import type {
-	SupportedPHPVersion,
-	EmscriptenOptions,
-	PHPRuntime,
+import {
+	type SupportedPHPVersion,
+	type EmscriptenOptions,
+	type PHPRuntime,
+	type FileLockManager,
 	loadPHPRuntime,
-	FSHelpers
+	FSHelpers,
 	FileLockManagerComposite,
 } from '@php-wasm/universal';
 import type { OSUserSpaceAPI, OSUserSpaceContext } from './os-user-space';
@@ -34,6 +35,7 @@ export interface PHPLoaderOptions {
 }
 
 export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
+	fileLockManager?: FileLockManager;
 	emscriptenOptions?: EmscriptenOptions & {
 		/**
 		 * The process ID for the PHP runtime.
@@ -65,7 +67,7 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
 		 */
 		nativeInternalDirPath?: string;
 	};
-}
+};
 
 /**
  * Does what load() does, but synchronously returns
