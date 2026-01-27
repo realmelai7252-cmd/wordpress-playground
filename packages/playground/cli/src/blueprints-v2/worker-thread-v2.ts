@@ -40,7 +40,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { rootCertificates } from 'tls';
 import { MessageChannel, type MessagePort, parentPort } from 'worker_threads';
-import { type RunCLIArgs } from '../run-cli';
+import { type RunCLIArgs, spawnWorkerThread } from '../run-cli';
 import type {
 	PhpIniOptions,
 	PHPInstanceCreatedHook,
