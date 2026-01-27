@@ -8,6 +8,7 @@ import type {
 	WholeFileLockOp,
 } from '@php-wasm/universal';
 import type { OSKernelSpace } from './os-kernel-space';
+import { lookup } from 'dns/promises';
 
 type FSNode = Emscripten.FS.FSNode;
 
@@ -101,6 +102,7 @@ export type OSUserSpaceAPI = {
 	flock: (fd: number, op: number) => number;
 	fd_close: (fd: number) => number;
 	js_release_file_locks: () => void;
+	gethostbyname: (hostname: string) => Promise<string>;
 };
 
 export function bindUserSpace(
@@ -992,10 +994,26 @@ export function bindUserSpace(
 		}
 	}
 
+	// TODO: Add a test for this.
+	/**
+	 * Resolve a hostname to an IP address.
+	 *
+	 * @param hostname The hostname to resolve.
+	 * @returns The IP address of the hostname as a string.
+	 */
+	async function gethostbyname(hostname: string): Promise<string> {
+		const { address } = await lookup(hostname, {
+			family: 4,
+			verbatim: false,
+		});
+		return address;
+	}
+
 	return {
 		fcntl64,
 		flock,
 		fd_close,
 		js_release_file_locks,
+		gethostbyname,
 	};
 }
