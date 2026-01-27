@@ -55,7 +55,6 @@ export type WorkerBootOptions = {
 	 * PHP constants to define via php.defineConstant().
 	 * Process-specific, set for each PHP instance.
 	 */
-	constants?: Record<string, string | number | boolean | null>;
 };
 
 export type WorkerBootWordPressOptions = {
@@ -256,18 +255,14 @@ function createPhpRuntimeFactory(
 				emscriptenOptions: {
 					processId,
 					trace: options.trace ? tracePhpWasm : undefined,
-					phpWasmInitOptions: {
-						nativeInternalDirPath: options.nativeInternalDirPath,
-						bindUserSpace: (
-							userSpaceContext: OSUserSpaceContext
-						) => {
-							return bindUserSpace(
-								{
-									fileLockManager,
-								},
-								userSpaceContext
-							);
-						},
+					nativeInternalDirPath: options.nativeInternalDirPath,
+					bindUserSpace: (userSpaceContext: OSUserSpaceContext) => {
+						return bindUserSpace(
+							{
+								fileLockManager,
+							},
+							userSpaceContext
+						);
 					},
 				},
 				followSymlinks: options.followSymlinks,

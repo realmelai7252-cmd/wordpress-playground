@@ -1,6 +1,11 @@
 import { errorLogPath, logger } from '@php-wasm/logger';
 import type { FileLockManager } from '@php-wasm/universal';
-import { createNodeFsMountHandler, loadNodeRuntime } from '@php-wasm/node';
+import {
+	bindUserSpace,
+	createNodeFsMountHandler,
+	loadNodeRuntime,
+	type OSUserSpaceContext,
+} from '@php-wasm/node';
 import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type {
 	PHP,
@@ -483,6 +488,16 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 								DOCROOT: '/wordpress',
 							},
 							nativeInternalDirPath,
+							bindUserSpace: (
+								userSpaceContext: OSUserSpaceContext
+							) => {
+								return bindUserSpace(
+									{
+										fileLockManager: this.fileLockManager!,
+									},
+									userSpaceContext
+								);
+							},
 						},
 						followSymlinks: allow?.includes('follow-symlinks'),
 						withIntl: withIntl,
