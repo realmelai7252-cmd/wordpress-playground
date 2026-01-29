@@ -7,8 +7,8 @@ import {
 	FSHelpers,
 	FileLockManagerComposite,
 } from '@php-wasm/universal';
-import type { OSUserSpaceAPI, OSUserSpaceContext } from './os-user-space';
-import { bindUserSpace } from './os-user-space';
+import type { WasmUserSpaceAPI, WasmUserSpaceContext } from './wasm-user-space';
+import { bindUserSpace } from './wasm-user-space';
 import fs from 'fs';
 import { getPHPLoaderModule } from '.';
 import { FileLockManagerForPosix } from './file-lock-manager-for-posix';
@@ -49,8 +49,8 @@ export type PHPLoaderOptionsForNode = PHPLoaderOptions & {
 
 		// TODO: Document this.
 		bindUserSpace?: (
-			userSpaceContext: OSUserSpaceContext
-		) => OSUserSpaceAPI;
+			userSpaceContext: WasmUserSpaceContext
+		) => WasmUserSpaceAPI;
 
 		/**
 		 * An optional function to collect trace messages.
@@ -91,7 +91,7 @@ export async function loadNodeRuntime(
 		quit: function (code, error) {
 			throw error;
 		},
-		bindUserSpace: (userSpaceContext: OSUserSpaceContext) => {
+		bindUserSpace: (userSpaceContext: WasmUserSpaceContext) => {
 			const nativeFileLockManager =
 				platform() === 'win32'
 					? new FileLockManagerForWindows()

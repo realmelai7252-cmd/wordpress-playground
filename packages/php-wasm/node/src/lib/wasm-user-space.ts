@@ -1,13 +1,11 @@
 // TODO: Document why we use the term "user space" for this file.
-// TODO: Rename this module to php-wasm-user-space.ts.
-// TODO: Move FileLockManager into php-wasm/universal to resolve this
 import type {
 	Emscripten,
 	RequestedRangeLock,
 	WholeFileLock,
 	WholeFileLockOp,
 } from '@php-wasm/universal';
-import type { OSKernelSpace } from './os-kernel-space';
+import type { WasmKernelSpace } from './wasm-kernel-space';
 import { lookup } from 'dns/promises';
 
 type FSNode = Emscripten.FS.FSNode;
@@ -18,7 +16,7 @@ type ResultTuple<T> =
 	| [value: never, errorCode: NonZeroNumber];
 
 // TODO: Consider better name than OSUserSpace. Maybe WasmUserSpace, SystemUserSpace, etc?
-export type OSUserSpaceContext = {
+export type WasmUserSpaceContext = {
 	pid: number;
 	// TODO: When receiving this context, validate that all these fields exist.
 	constants: {
@@ -97,7 +95,7 @@ export type OSUserSpaceContext = {
 	};
 };
 
-export type OSUserSpaceAPI = {
+export type WasmUserSpaceAPI = {
 	fcntl64: (fd: number, cmd: number, varargs?: number) => number;
 	flock: (fd: number, op: number) => number;
 	fd_close: (fd: number) => number;
@@ -106,7 +104,7 @@ export type OSUserSpaceAPI = {
 };
 
 export function bindUserSpace(
-	{ fileLockManager }: OSKernelSpace,
+	{ fileLockManager }: WasmKernelSpace,
 	{
 		pid,
 		memory: { HEAP16, HEAP64, HEAP32 },
@@ -139,8 +137,8 @@ export function bindUserSpace(
 		FS,
 		PROXYFS,
 		NODEFS,
-	}: OSUserSpaceContext
-): OSUserSpaceAPI {
+	}: WasmUserSpaceContext
+): WasmUserSpaceAPI {
 	class VarArgsAccessor {
 		argsAddr: number;
 
