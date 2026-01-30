@@ -252,18 +252,12 @@ function createPhpRuntimeFactory(
 		return await loadNodeRuntime(
 			options.phpVersion || RecommendedPHPVersion,
 			{
+				// TODO: Find way to test and ensure this arg is not left out
+				fileLockManager,
 				emscriptenOptions: {
 					processId,
 					trace: options.trace ? tracePhpWasm : undefined,
 					nativeInternalDirPath: options.nativeInternalDirPath,
-					bindUserSpace: (userSpaceContext: WasmUserSpaceContext) => {
-						return bindUserSpace(
-							{
-								fileLockManager,
-							},
-							userSpaceContext
-						);
-					},
 				},
 				followSymlinks: options.followSymlinks,
 				withIntl: options.withIntl,
