@@ -1376,10 +1376,8 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 					}
 				}
 
-				// TODO: Make sure we haven't broken the improved CLI output
-				logger.log(
-					`WordPress is running on ${serverUrl} with ${targetWorkerCount} worker(s)`
-				);
+				cliOutput.finishProgress();
+				cliOutput.printReady(serverUrl, targetWorkerCount);
 
 				if (args.xdebug && args.experimentalDevtools) {
 					const bridge = await startBridge({
