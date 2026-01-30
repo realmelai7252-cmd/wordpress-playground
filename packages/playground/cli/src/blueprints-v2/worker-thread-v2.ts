@@ -4,7 +4,7 @@ import {
 	bindUserSpace,
 	createNodeFsMountHandler,
 	loadNodeRuntime,
-	type OSUserSpaceContext,
+	type WasmUserSpaceContext,
 } from '@php-wasm/node';
 import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type {
@@ -489,7 +489,7 @@ export class PlaygroundCliBlueprintV2Worker extends PHPWorker {
 							},
 							nativeInternalDirPath,
 							bindUserSpace: (
-								userSpaceContext: OSUserSpaceContext
+								userSpaceContext: WasmUserSpaceContext
 							) => {
 								return bindUserSpace(
 									{

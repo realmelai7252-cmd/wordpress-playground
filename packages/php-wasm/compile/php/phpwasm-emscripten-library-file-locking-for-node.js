@@ -30,7 +30,7 @@
  * Either way, we have not yet found a way to fix this issue for the asyncify builds,
  * so we opted to use synchronous remote calls instead.
  *
- * For the sake of simplicity with the injected osUserSpace syscall implementations,
+ * For the sake of simplicity with the injected wasmUserSpace syscall implementations,
  * both the JSPI and Asyncify builds use synchronous remote calls in this script.
  * As of today 2026-01-27, php-wasm/node workers in Playground CLI are single-threaded,
  * so there should be no harm in blocking the worker to service the one php-wasm instance.

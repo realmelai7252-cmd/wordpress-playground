@@ -23,7 +23,6 @@ import {
 	type RunCLIArgs,
 	type SpawnedWorker,
 	type WorkerType,
-	mergeDefinedConstants,
 } from '../run-cli';
 import type { CLIOutput } from '../cli-output';
 
@@ -195,7 +194,6 @@ export class BlueprintsV1Handler {
 			withMemcached: this.args.memcached,
 			withXdebug: !!this.args.xdebug,
 			nativeInternalDirPath,
-			constants: mergeDefinedConstants(this.args),
 		});
 		await playground.isReady();
 		return playground;

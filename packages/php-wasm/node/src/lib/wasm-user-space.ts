@@ -15,7 +15,6 @@ type ResultTuple<T> =
 	| [value: T, errorCode: 0]
 	| [value: never, errorCode: NonZeroNumber];
 
-// TODO: Consider better name than OSUserSpace. Maybe WasmUserSpace, SystemUserSpace, etc?
 export type WasmUserSpaceContext = {
 	pid: number;
 	// TODO: When receiving this context, validate that all these fields exist.

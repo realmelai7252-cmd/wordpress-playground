@@ -2,7 +2,7 @@ import type { FileLockManager } from '@php-wasm/universal';
 import {
 	loadNodeRuntime,
 	bindUserSpace,
-	type OSUserSpaceContext,
+	type WasmUserSpaceContext,
 } from '@php-wasm/node';
 import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { SupportedPHPVersion } from '@php-wasm/universal';
@@ -256,7 +256,7 @@ function createPhpRuntimeFactory(
 					processId,
 					trace: options.trace ? tracePhpWasm : undefined,
 					nativeInternalDirPath: options.nativeInternalDirPath,
-					bindUserSpace: (userSpaceContext: OSUserSpaceContext) => {
+					bindUserSpace: (userSpaceContext: WasmUserSpaceContext) => {
 						return bindUserSpace(
 							{
 								fileLockManager,

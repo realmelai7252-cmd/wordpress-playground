@@ -4,7 +4,9 @@ import {
 	type WholeFileLockOp,
 	type FileLockManager,
 } from './file-lock-manager';
-import { logger } from '@php-wasm/logger';
+
+// TODO: Remove console.debug statements after debugging.
+/* eslint-disable no-console */
 
 // TODO: Add unit tests for this class.
 // TODO: Find a clearer name for this class.
@@ -22,7 +24,6 @@ export class FileLockManagerComposite implements FileLockManager {
 
 	lockWholeFile(path: Path, op: WholeFileLockOp): boolean {
 		// TODO: Consider adding printf-style logger.trace() for more granular logging like this.
-		// TODO: Remove console.debug statements after debugging.
 		console.debug(
 			`[Composite] lockWholeFile: path=${path}, type=${op.type}, pid=${op.pid}, fd=${op.fd}`
 		);
