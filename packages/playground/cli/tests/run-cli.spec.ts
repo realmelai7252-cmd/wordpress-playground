@@ -31,14 +31,15 @@ const blueprintVersions = [
 			'experimental-trace': false,
 		},
 	},
-	{
-		version: 2,
-		suiteCliArgs: {
-			'experimental-blueprints-v2-runner': true,
-			'experimental-trace': false,
-		},
-		expectedHomePageTitle: 'WordPress Site',
-	},
+	// TODO: Re-enable these when re-enabling Blueprints v2 support
+	// {
+	// 	version: 2,
+	// 	suiteCliArgs: {
+	// 		'experimental-blueprints-v2-runner': true,
+	// 		'experimental-trace': false,
+	// 	},
+	// 	expectedHomePageTitle: 'WordPress Site',
+	// },
 ];
 
 describe.each(blueprintVersions)(
