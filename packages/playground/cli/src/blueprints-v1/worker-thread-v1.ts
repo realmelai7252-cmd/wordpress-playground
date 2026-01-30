@@ -1,9 +1,5 @@
 import type { FileLockManager } from '@php-wasm/universal';
-import {
-	loadNodeRuntime,
-	bindUserSpace,
-	type WasmUserSpaceContext,
-} from '@php-wasm/node';
+import { loadNodeRuntime } from '@php-wasm/node';
 import { EmscriptenDownloadMonitor } from '@php-wasm/progress';
 import type { SupportedPHPVersion } from '@php-wasm/universal';
 import {
