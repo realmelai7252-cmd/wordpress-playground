@@ -137,6 +137,7 @@
 		"@nx/vite": "19.8.4",
 		"@nx/workspace": "19.8.4",
 		"@playwright/test": "1.55.1",
+		"@rolldown/pluginutils": "1.0.0-beta.53",
 		"@types/ajv": "1.0.0",
 		"@types/file-saver": "^2.0.5",
 		"@types/fs-extra": "11.0.4",
@@ -228,6 +229,5 @@
 	"engines": {
 		"node": ">=20.18.3",
 		"npm": ">=10.1.0"
-	},
-	"optionalDependencies": {}
+	}
 }
