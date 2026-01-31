@@ -25,6 +25,7 @@ import { spawnWorkerThread } from '../run-cli';
 
 import type { Mount } from '@php-wasm/cli-util';
 
+// TODO: Are this and WorkerBootRequestHandlerOptions redundant types?
 export type WorkerBootOptions = {
 	phpVersion: SupportedPHPVersion;
 	siteUrl: string;
