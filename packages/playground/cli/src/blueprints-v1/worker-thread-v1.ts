@@ -47,10 +47,6 @@ export type WorkerBootOptions = {
 	withMemcached?: boolean;
 	withXdebug?: boolean;
 	nativeInternalDirPath: string;
-	/**
-	 * PHP constants to define via php.defineConstant().
-	 * Process-specific, set for each PHP instance.
-	 */
 };
 
 export type WorkerBootWordPressOptions = {
@@ -60,6 +56,10 @@ export type WorkerBootWordPressOptions = {
 	wordPressZip?: ArrayBuffer;
 	sqliteIntegrationPluginZip?: ArrayBuffer;
 	dataSqlPath?: string;
+	/**
+	 * PHP constants to define via php.defineConstant().
+	 */
+	constants?: Record<string, string | number | boolean>;
 };
 
 interface WorkerBootRequestHandlerOptions {
@@ -125,6 +125,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 			wordPressZip,
 			sqliteIntegrationPluginZip,
 			dataSqlPath,
+			constants,
 		} = options;
 
 		try {
@@ -153,6 +154,7 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 					disable_functions: '',
 				},
 				dataSqlPath,
+				constants,
 			});
 
 			// Notify all workers to apply post-install mounts.

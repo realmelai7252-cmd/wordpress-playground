@@ -23,6 +23,7 @@ import {
 	type RunCLIArgs,
 	type SpawnedWorker,
 	type WorkerType,
+	mergeDefinedConstants,
 } from '../run-cli';
 import type { CLIOutput } from '../cli-output';
 
@@ -137,6 +138,7 @@ export class BlueprintsV1Handler {
 					wordPressZip && (await wordPressZip!.arrayBuffer()),
 				sqliteIntegrationPluginZip:
 					await sqliteIntegrationPluginZip?.arrayBuffer(),
+				constants: mergeDefinedConstants(this.args),
 			},
 			workerPostInstallMountsPort
 		);
