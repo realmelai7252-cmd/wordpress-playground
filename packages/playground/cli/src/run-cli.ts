@@ -1225,7 +1225,10 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 					})
 				);
 				if (server) {
-					await new Promise((resolve) => server.close(resolve));
+					await new Promise((resolve) => {
+						server.close(resolve);
+						server.closeAllConnections();
+					});
 				}
 				await nativeDir.cleanup();
 			};
