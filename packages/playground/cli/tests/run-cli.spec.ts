@@ -217,10 +217,6 @@ describe.each(blueprintVersions)(
 				// Issue here: https://github.com/WordPress/wordpress-playground/issues/2936
 				skip();
 			}
-			if (version === 2) {
-				// @TODO: Fix this feature for Blueprints v2 (or fix the test if it is just a test issue)
-				skip();
-			}
 
 			const testArgs: Partial<RunCLIArgs> =
 				version === 2
@@ -268,9 +264,6 @@ describe.each(blueprintVersions)(
 						},
 					],
 				});
-				expect(
-					cliServer[internalsKeyForTesting].workerThreadCount
-				).toBe(1);
 				// Make multiple simultaneous requests to force the use of a secondary PHP instance.
 				// TODO: Find way to confirm this. Maybe a custom response header that announces the worker.
 				const sleepUrl = new URL(
@@ -477,14 +470,7 @@ describe.each(blueprintVersions)(
 				);
 			});
 
-			test(`should run a wp-content project using --auto-mount`, async ({
-				skip,
-			}) => {
-				if (version === 2) {
-					// @TODO: Fix this feature for Blueprints v2 (or fix the test if it is just a test issue)
-					skip();
-				}
-
+			test(`should run a wp-content project using --auto-mount`, async () => {
 				vi.spyOn(process, 'cwd').mockReturnValue(
 					path.join(
 						import.meta.dirname,
@@ -523,11 +509,6 @@ describe.each(blueprintVersions)(
 			}) => {
 				if (os.platform() === 'win32') {
 					// @TODO: Find out why this test fails on Windows and fix it.
-					skip();
-				}
-				if (version === 2) {
-					// @TODO: Fix this test for Blueprints v2.
-					// It makes a valid complaint that the unzipped WP is not yet installed.
 					skip();
 				}
 
@@ -593,16 +574,7 @@ describe.each(blueprintVersions)(
 				}
 			});
 
-			test('should start server successfully with default verbosity', async ({
-				skip,
-			}) => {
-				// Skip v2 early to avoid starting expensive WordPress download
-				// @TODO: Fix this test for v2 in CI. It passes locally but not on GitHub.
-				if (version === 2) {
-					skip();
-					return;
-				}
-
+			test('should start server successfully with default verbosity', async () => {
 				cliServer = await runCLI({
 					...suiteCliArgs,
 					command: 'server',

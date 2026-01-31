@@ -67,7 +67,7 @@ export class BlueprintsV2Handler {
 		return playground;
 	}
 
-	async bootPlayground({
+	async bootRequestHandler({
 		worker,
 		fileLockManagerPort,
 		firstProcessId,

@@ -159,7 +159,7 @@ export class BlueprintsV1Handler {
 		return playground;
 	}
 
-	async bootPlayground({
+	async bootRequestHandler({
 		worker,
 		fileLockManagerPort,
 		firstProcessId,
@@ -179,7 +179,7 @@ export class BlueprintsV1Handler {
 			this.getEffectiveBlueprint()
 		);
 		await playground.useFileLockManager(fileLockManagerPort);
-		await playground.bootWorker({
+		await playground.bootRequestHandler({
 			phpVersion: runtimeConfiguration.phpVersion,
 			siteUrl: this.siteUrl,
 			mountsBeforeWpInstall: this.args['mount-before-install'] || [],
@@ -188,8 +188,6 @@ export class BlueprintsV1Handler {
 			processIdSpaceLength: this.processIdSpaceLength,
 			followSymlinks: this.args.followSymlinks === true,
 			trace: this.args.experimentalTrace === true,
-			// @TODO: Move this to the request handler or else every worker
-			//        will have a separate cookie store.
 			internalCookieStore: this.args.internalCookieStore,
 			withIntl: this.args.intl,
 			withRedis: this.args.redis,

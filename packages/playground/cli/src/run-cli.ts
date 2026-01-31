@@ -1279,12 +1279,13 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 							// TODO: Make sure the FileLockManager is exposed to proc_open/cli workers.
 							const fileLockManagerPort =
 								await exposeFileLockManager(fileLockManager);
-							const playgroundApi = await handler.bootPlayground({
-								worker: workerProcess,
-								fileLockManagerPort,
-								firstProcessId,
-								nativeInternalDirPath,
-							});
+							const playgroundApi =
+								await handler.bootRequestHandler({
+									worker: workerProcess,
+									fileLockManagerPort,
+									firstProcessId,
+									nativeInternalDirPath,
+								});
 
 							workerToPlaygroundMap.set(
 								workerProcess,

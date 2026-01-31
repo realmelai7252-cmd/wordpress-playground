@@ -25,31 +25,6 @@ import { spawnWorkerThread } from '../run-cli';
 
 import type { Mount } from '@php-wasm/cli-util';
 
-// TODO: Are this and WorkerBootRequestHandlerOptions redundant types?
-export type WorkerBootOptions = {
-	phpVersion: SupportedPHPVersion;
-	siteUrl: string;
-	mountsBeforeWpInstall: Array<Mount>;
-	mountsAfterWpInstall: Array<Mount>;
-	firstProcessId: number;
-	processIdSpaceLength: number;
-	followSymlinks: boolean;
-	trace: boolean;
-	/**
-	 * When true, Playground will not send cookies to the client but will manage
-	 * them internally. This can be useful in environments that can't store cookies,
-	 * e.g. VS Code WebView.
-	 *
-	 * Default: false.
-	 */
-	internalCookieStore?: boolean;
-	withIntl?: boolean;
-	withRedis?: boolean;
-	withMemcached?: boolean;
-	withXdebug?: boolean;
-	nativeInternalDirPath: string;
-};
-
 export type WorkerBootWordPressOptions = {
 	siteUrl: string;
 	wpVersion?: string;
@@ -65,7 +40,6 @@ export type WorkerBootWordPressOptions = {
 
 interface WorkerBootRequestHandlerOptions {
 	siteUrl: string;
-	followSymlinks: boolean;
 	phpVersion: SupportedPHPVersion;
 	firstProcessId: number;
 	processIdSpaceLength: number;
@@ -73,6 +47,15 @@ interface WorkerBootRequestHandlerOptions {
 	nativeInternalDirPath: string;
 	mountsBeforeWpInstall: Array<Mount>;
 	mountsAfterWpInstall: Array<Mount>;
+	/**
+	 * When true, Playground will not send cookies to the client but will manage
+	 * them internally. This can be useful in environments that can't store cookies,
+	 * e.g. VS Code WebView.
+	 *
+	 * Default: false.
+	 */
+	internalCookieStore?: boolean;
+	followSymlinks: boolean;
 	withIntl?: boolean;
 	withRedis?: boolean;
 	withMemcached?: boolean;
@@ -96,7 +79,8 @@ function tracePhpWasm(processId: number, format: string, ...args: any[]) {
 }
 
 export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
-	booted = false;
+	bootedRequestHandler = false;
+	bootedWordPress = false;
 	fileLockManager: FileLockManager | undefined;
 
 	constructor(monitor: EmscriptenDownloadMonitor) {
@@ -120,6 +104,10 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		options: WorkerBootWordPressOptions,
 		workerPostInstallMountsPort: MessagePort
 	) {
+		if (this.bootedWordPress) {
+			throw new Error('WordPress already booted');
+		}
+		this.bootedWordPress = true;
 		const {
 			siteUrl,
 			wordpressInstallMode,
@@ -172,19 +160,11 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 		}
 	}
 
-	async hello() {
-		return 'hello';
-	}
-
-	async bootWorker(args: WorkerBootOptions) {
-		await this.bootRequestHandler(args);
-	}
-
 	async bootRequestHandler(options: WorkerBootRequestHandlerOptions) {
-		if (this.booted) {
+		if (this.bootedRequestHandler) {
 			throw new Error('Playground already booted');
 		}
-		this.booted = true;
+		this.bootedRequestHandler = true;
 
 		try {
 			const requestHandler = await bootRequestHandler({
@@ -196,14 +176,35 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 				),
 				onPHPInstanceCreated: async (php) => {
 					await mountResources(php, options.mountsBeforeWpInstall);
-					await mountResources(php, options.mountsAfterWpInstall);
+
+					// TODO: Finish reworking how php exec instances are spawned.
+					// NOTE: This does not apply to the initial set of Playground CLI
+					// workers. We explicitly apply those mounts after WordPress install.
+					// This condition applies to any workers created on-demand after WordPress
+					// boot. Post-install workers may be created for proc_open() calls,
+					// and we may choose to respawn a crashed worker.
+					// if (options.alreadyBootedWordPress) {
+					// 	await mountResources(php, options.mountsAfterWpInstall);
+					// }
 				},
 				sapiName: 'cli',
 				cookieStore: false,
 				spawnHandler: () =>
-					sandboxedSpawnHandlerFactory(() =>
-						createPHPWorker(options, this.fileLockManager!)
-					),
+					sandboxedSpawnHandlerFactory(() => {
+						let effectiveOptions = options;
+						if (!this.bootedWordPress) {
+							// WordPress is not yet booted so skip the post-install mounts.
+							effectiveOptions = {
+								...options,
+								mountsAfterWpInstall: [],
+							};
+						}
+
+						return createPHPWorker(
+							effectiveOptions,
+							this.fileLockManager!
+						);
+					}),
 			});
 			this.__internal_setRequestHandler(requestHandler);
 
@@ -218,6 +219,10 @@ export class PlaygroundCliBlueprintV1Worker extends PHPWorker {
 	}
 
 	async mountAfterWordPressInstall(mounts: Array<Mount>) {
+		// Make sure workers not involved in the WordPress install
+		// process know whether WordPress booted so they can
+		// apply post-install mounts when spawning new PHP workers.
+		this.bootedWordPress = true;
 		await mountResources(this.__internal_getPHP()!, mounts);
 	}
 
@@ -295,7 +300,7 @@ async function createPHPWorker(
 		spawnedWorker.phpPort
 	);
 	handler.useFileLockManager(fileLockManager as any);
-	await handler.bootWorker(options);
+	await handler.bootRequestHandler(options);
 
 	return {
 		php: handler,
