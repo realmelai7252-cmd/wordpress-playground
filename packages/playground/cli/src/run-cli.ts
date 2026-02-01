@@ -1277,7 +1277,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 							spawnedWorkers.push(workerProcess);
 
 							const firstProcessId =
-								workerIndex * processIdSpaceLength;
+								workerIndex * processIdSpaceLength + 1;
 
 							// TODO: Make sure the FileLockManager is exposed to proc_open/cli workers.
 							const fileLockManagerPort =
