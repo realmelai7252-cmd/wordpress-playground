@@ -1300,6 +1300,18 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 					);
 
 					promisesToBoot.push(promiseToBoot);
+
+					// TODO: Remove this workaround after we remove the inherent race
+					// from @wp-playground/wordpress's bootRequestHandler() function.
+					if (workerIndex === 0) {
+						// Wait for the first worker to boot to avoid a race condition
+						// with writing initial PHP files in bootRequestHandler().
+						// This is the race condition:
+						// https://github.com/WordPress/wordpress-playground/blob/e758ee0893d199416a2d740195815234584b1b44/packages/playground/wordpress/src/boot.ts#L416-L426
+						// Multiple workers may detect that .boot-files-written does not exist
+						// and proceed to try to write initial boot files.
+						await promiseToBoot;
+					}
 				}
 
 				await Promise.all(promisesToBoot);
