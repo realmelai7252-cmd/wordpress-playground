@@ -321,6 +321,7 @@ export async function parseOptionsAndRunCLI(argsToParse: string[]) {
 				type: 'number',
 				default: 9400,
 			},
+			// TODO: Mark this as deprecated since we always use multiple workers.
 			'experimental-multi-worker': {
 				describe:
 					'Enable experimental multi-worker support which requires ' +
@@ -328,7 +329,8 @@ export async function parseOptionsAndRunCLI(argsToParse: string[]) {
 					'Pass a positive number to specify the number of workers to use. ' +
 					'Otherwise, default to the number of CPUs minus 1.',
 				type: 'number',
-				coerce: (value?: number) => value ?? cpus().length - 1,
+				coerce: (value?: number) =>
+					value ?? Math.max(cpus().length - 1, 1),
 			},
 			'experimental-devtools': {
 				describe: 'Enable experimental browser development tools.',
