@@ -323,14 +323,14 @@ export async function parseOptionsAndRunCLI(argsToParse: string[]) {
 			},
 			// TODO: Mark this as deprecated since we always use multiple workers.
 			'experimental-multi-worker': {
+				deprecated:
+					'This option is not needed. Multiple workers are always used.',
 				describe:
 					'Enable experimental multi-worker support which requires ' +
 					'a /wordpress directory backed by a real filesystem. ' +
 					'Pass a positive number to specify the number of workers to use. ' +
 					'Otherwise, default to the number of CPUs minus 1.',
 				type: 'number',
-				coerce: (value?: number) =>
-					value ?? Math.max(cpus().length - 1, 1),
 			},
 			'experimental-devtools': {
 				describe: 'Enable experimental browser development tools.',
@@ -552,24 +552,6 @@ export async function parseOptionsAndRunCLI(argsToParse: string[]) {
 					}
 				}
 
-				if (args['experimental-multi-worker'] !== undefined) {
-					const cliCommand = args._[0] as string;
-					if (cliCommand !== 'server') {
-						throw new Error(
-							'The --experimental-multi-worker flag is only supported when running the server command.'
-						);
-					}
-					if (
-						args['experimental-multi-worker'] !== undefined &&
-						typeof args['experimental-multi-worker'] === 'number' &&
-						args['experimental-multi-worker'] <= 1
-					) {
-						throw new Error(
-							'The --experimental-multi-worker flag must be a positive integer greater than 1.'
-						);
-					}
-				}
-
 				if (args['experimental-blueprints-v2-runner'] === true) {
 					if (args['mode'] !== undefined) {
 						if (args['wordpress-install-mode'] !== undefined) {
@@ -739,7 +721,6 @@ export interface RunCLIArgs {
 	verbosity?: LogVerbosity;
 	wp?: string;
 	autoMount?: string;
-	experimentalMultiWorker?: number;
 	experimentalTrace?: boolean;
 	internalCookieStore?: boolean;
 	'additional-blueprint-steps'?: any[];
@@ -951,7 +932,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 			const siteUrl = args['site-url'] || serverUrl;
 
 			const targetWorkerCount = Math.max(
-				args.experimentalMultiWorker ?? MINIMUM_WORKER_COUNT,
+				cpus().length - 1,
 				MINIMUM_WORKER_COUNT
 			);
 
