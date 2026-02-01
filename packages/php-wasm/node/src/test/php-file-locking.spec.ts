@@ -106,7 +106,9 @@ error_log = ${errorLogPath}
 			// }
 			if ((await result.exitCode) !== 0) {
 				throw new Error(
-					`Failed to create table: ${(await result.stderrText) || 'Unknown error'}`
+					`Failed to create table: ${await result.stdoutText} ${
+						(await result.stderrText) || 'Unknown error'
+					}`
 				);
 			}
 		});
