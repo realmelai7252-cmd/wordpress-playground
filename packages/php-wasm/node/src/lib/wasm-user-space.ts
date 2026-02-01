@@ -941,8 +941,9 @@ export function bindUserSpace(
 
 		if (nativeFdErrno !== 0) {
 			js_wasm_trace(
-				'fd_close(%d) get_native_fd_from_emscripten_fd error %d',
+				'fd_close(%d) %s get_native_fd_from_emscripten_fd error %d',
 				fd,
+				vfsPath,
 				nativeFdErrno
 			);
 			return fdCloseResult;
