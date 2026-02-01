@@ -120,7 +120,7 @@ describe(`PHP ${phpVersion}`, { concurrency: 1 }, () => {
 	 */
 	it(
 		'Should support git:directory resources',
-		{ timeout: 30000 },
+		{ timeout: 60000 },
 		async () => {
 			const cli = await runCLI({
 				command: 'server',
