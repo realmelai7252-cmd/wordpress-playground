@@ -608,6 +608,8 @@ export function bindUserSpace(
 					return -EINVAL;
 				}
 			}
+			// TODO: Double check waiting for lock. PHP 8.5 has been observed waiting for a lock.
+			case F_SETLKW:
 			case F_SETLK: {
 				js_wasm_trace('fcntl(%d, F_SETLK)', fd);
 				const [vfsPath, vfsPathErrno] =
@@ -736,13 +738,6 @@ export function bindUserSpace(
 					);
 					return -EINVAL;
 				}
-			}
-			// @TODO: Implement waiting for lock
-			case F_SETLKW: {
-				// We do not yet support the blocking form of flock().
-				// We respond with EDEADLK to indicate failure
-				// because it is a known errno for a failed F_SETLKW command.
-				return -EDEADLK;
 			}
 			case F_SETFL: {
 				/**
