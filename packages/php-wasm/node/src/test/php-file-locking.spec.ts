@@ -15,7 +15,6 @@ import {
 } from '@php-wasm/universal';
 import { createNodeFsMountHandler, loadNodeRuntime } from '../lib';
 import {
-	joinPaths,
 	/* eslint-disable-next-line @typescript-eslint/no-unused-vars --
 	 * sprintf() is used in a trace function that is commented out by default.
 	 */

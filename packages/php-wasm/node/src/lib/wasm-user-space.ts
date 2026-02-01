@@ -129,7 +129,7 @@ export function bindUserSpace(
 			LOCK_NB,
 			LOCK_UN,
 		},
-		errnoCodes: { EBADF, EINVAL, EAGAIN, EWOULDBLOCK, EDEADLK },
+		errnoCodes: { EBADF, EINVAL, EAGAIN, EWOULDBLOCK },
 		wasmImports: { builtin_fcntl64, builtin_fd_close, js_wasm_trace },
 		wasmExports: { wasm_get_end_offset },
 		syscalls: { getStreamFromFD },
