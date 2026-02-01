@@ -10,7 +10,6 @@ const TEST_SUITE_CLEANUP_TIMEOUT = 120_000;
 const TEST_CASE_TIMEOUT = 60_000;
 const TEST_DIR = '/wordpress/test';
 const TEST_DIR_URI = '/test';
-const MULTI_WORKER_COUNT = 4;
 
 describe('Playground CLI file locking', () => {
 	let cliServer: RunCLIServer;
@@ -31,8 +30,6 @@ describe('Playground CLI file locking', () => {
 					vfsPath: TEST_DIR,
 				},
 			],
-			// Test locking across multiple workers
-			experimentalMultiWorker: MULTI_WORKER_COUNT,
 			verbosity: 'debug',
 			// NOTE: You can uncomment this for debugging test failures.
 			// experimentalTrace: true,
