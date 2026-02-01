@@ -1305,6 +1305,7 @@ describe('Playground CLI file locking', () => {
 				).toBe(true);
 			});
 
+			// TODO: The rest of the tests hang sometimes. Could be some kind of race condition. Investigate.
 			it('should release an exclusive lock when its associated file descriptor is closed', async () => {
 				const testId = randomUUID();
 				const testFilePath = `${TEST_DIR}/${testId}-exclusive-close.txt`;
