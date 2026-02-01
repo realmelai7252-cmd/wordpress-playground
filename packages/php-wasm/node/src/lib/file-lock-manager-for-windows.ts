@@ -1,4 +1,3 @@
-// TODO: Add these types to the fs-ext-extra-prebuilt package.
 import {
 	lockFileExSync,
 	unlockFileExSync,

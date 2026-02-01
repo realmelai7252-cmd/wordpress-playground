@@ -113,6 +113,7 @@ export class FileLockManagerForPosix implements FileLockManager {
 			return undefined;
 		}
 
+		// TODO: Is this still true with our fork?
 		// With fs-ext's current fcntl() implementation,
 		// we cannot query existing locks properly with F_GETLK.
 		// It only returns whether the F_GETLK command failed or not,
