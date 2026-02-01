@@ -12,12 +12,20 @@ describe('temp-dir', () => {
 
 	let childProcess: ReturnType<typeof fork>;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		const tempDirTestProcessPath = join(
 			__dirname,
 			'temp-dir-test-process.ts'
 		);
 		childProcess = fork(tempDirTestProcessPath);
+		await new Promise<void>((resolve, reject) => {
+			childProcess.on('error', (err) => {
+				reject(err);
+			});
+			childProcess.on('spawn', () => {
+				resolve();
+			});
+		});
 	});
 
 	afterEach(async () => {
