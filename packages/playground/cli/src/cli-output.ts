@@ -285,4 +285,12 @@ export class CLIOutput {
 
 		this.writeStream.write(`${this.yellow('Warning:')} ${message}\n`);
 	}
+
+	printInfo(message: string, newLine = false): void {
+		if (this.isQuiet) return;
+
+		if (newLine) this.writeStream.write('\n');
+
+		this.writeStream.write(`${this.cyan('Info:')} ${message}\n`);
+	}
 }
