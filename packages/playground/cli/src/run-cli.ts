@@ -910,7 +910,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 		cliOutput.printConfig({
 			phpVersion: args.php || RecommendedPHPVersion,
 			wpVersion: args.wp || 'latest',
-			port: (args['port'] as number) || 9400,
+			port: args.port ?? 9400,
 			xdebug: !!args.xdebug,
 			intl: !!args.intl,
 			redis: !!args.redis,
@@ -924,8 +924,7 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 		});
 	}
 
-	const selectedPort =
-		args.command === 'server' ? ((args['port'] as number) ?? 9400) : 0;
+	const selectedPort = args.command === 'server' ? (args.port ?? 9400) : 0;
 
 	// Declare file lock manager outside scope of startServer
 	// so we can look at it when debugging request handling.
@@ -952,6 +951,9 @@ export async function runCLI(args: RunCLIArgs): Promise<RunCLIServer | void> {
 
 	const server = await startServer({
 		port: selectedPort,
+		onError: (error: Error) => {
+			cliOutput.printError(error.message);
+		},
 		onBind: async (server: Server, port: number) => {
 			const host = '127.0.0.1';
 			const serverUrl = `http://${host}:${port}`;
