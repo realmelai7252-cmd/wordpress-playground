@@ -1057,7 +1057,7 @@ export function declareFileLockManagerTests({
 					expect(result3).toBe(false);
 				});
 			});
-			describe.skip('unlock', () => {
+			describe('unlock', () => {
 				it('does not error when range not locked by current process', async () => {
 					await expect(
 						remoteProcessApi1.lockFileByteRange(
@@ -1159,7 +1159,9 @@ export function declareFileLockManagerTests({
 					);
 					expect(result2).toBe(true);
 				});
-				it('unlocks tail of owned locked range when that range overlaps head of unlocked range', async () => {
+
+				// TODO: Re-enable this once native lock managers support fcntl() partial range unlocking.
+				it.skip('unlocks tail of owned locked range when that range overlaps head of unlocked range', async () => {
 					// Get a lock from 0-100
 					const result1 = await remoteProcessApi1.lockFileByteRange(
 						TEST_FILE1_URL.pathname,
