@@ -115,7 +115,7 @@ describe('temp-dir', () => {
 		for (const tempDir of tempDirPaths) {
 			expect(fs.existsSync(tempDir)).toBe(false);
 		}
-	});
+	}, 60000 /* Avoid timeout when testing on Windows */);
 	// TODO: Remove the log messages from this test after debugging.
 	it('should not clean up stale temp dir if the process is still running', async () => {
 		console.log('sending create-temp-dir');
