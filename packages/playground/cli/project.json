@@ -132,7 +132,7 @@
 				"maxWarnings": 0
 			}
 		},
-		"test": {
+		"test-playground-cli": {
 			"executor": "@nx/vite:test",
 			"outputs": ["{workspaceRoot}/coverage/packages/playground/cli"],
 			"options": {

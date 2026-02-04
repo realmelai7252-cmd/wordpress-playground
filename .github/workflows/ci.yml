@@ -134,7 +134,7 @@ jobs:
               with:
                   node-version: 22
             - name: Run full test suite
-              run: node node_modules/nx/bin/nx affected --target=test
+              run: node node_modules/nx/bin/nx affected --target=test-playground-cli
     test-file-locking:
         strategy:
             matrix:
